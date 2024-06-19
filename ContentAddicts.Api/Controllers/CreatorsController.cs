@@ -25,4 +25,14 @@ public class CreatorsController : ControllerBase
 
         return Ok(creators);
     }
+
+    [HttpGet("{creatorId:guid}")]
+    public async Task<ActionResult<Creator>> GetCreator(Guid creatorId)
+    {
+        Creator? creator = await _creatorsService.GetCreator(creatorId);
+
+        if (creator is null) return NotFound();
+
+        return Ok(creator);
+    }
 }

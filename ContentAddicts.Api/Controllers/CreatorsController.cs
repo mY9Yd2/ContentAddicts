@@ -21,7 +21,7 @@ public class CreatorsController : ControllerBase
     {
         IEnumerable<Creator> creators = await _creatorsService.GetCreators();
 
-        if (!creators.Any()) return NotFound();
+        if (!creators.Any()) return NoContent();
 
         return Ok(creators);
     }

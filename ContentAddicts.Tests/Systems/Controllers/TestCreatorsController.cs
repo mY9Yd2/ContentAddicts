@@ -3,6 +3,7 @@ using ContentAddicts.Api.Models;
 using ContentAddicts.Api.Services;
 using ContentAddicts.Tests.Fixtures;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ContentAddicts.Tests.Systems.Controllers;
@@ -18,7 +19,7 @@ public class TestCreatorsController
     }
 
     [Fact]
-    public async Task Get_OnSuccess_ReturnsStatusCode200()
+    public async Task GetCreators_OnSuccess_ReturnsStatusCode200()
     {
         // Arrange
         var mockCreatorsService = new Mock<ICreatorsService>();
@@ -38,11 +39,11 @@ public class TestCreatorsController
                 .BeOfType<OkObjectResult>()
                 .Which.StatusCode
                 .Should()
-                .Be(200);
+                .Be(StatusCodes.Status200OK);
     }
 
     [Fact]
-    public async Task Get_OnSuccess_InvokesCreatorsServiceExactlyOnce()
+    public async Task GetCreators_OnSuccess_InvokesCreatorsServiceExactlyOnce()
     {
         // Arrange
         var mockCreatorsService = new Mock<ICreatorsService>();
@@ -65,7 +66,7 @@ public class TestCreatorsController
     }
 
     [Fact]
-    public async Task Get_OnSuccess_ReturnsListOfUsers()
+    public async Task GetCreators_OnSuccess_ReturnsListOfCreators()
     {
         // Arrange
         var mockCreatorsService = new Mock<ICreatorsService>();
@@ -91,7 +92,7 @@ public class TestCreatorsController
     }
 
     [Fact]
-    public async Task Get_OnNoUsersFound_Returns404()
+    public async Task GetCreators_OnNoCreatorsFound_Returns204()
     {
         // Arrange
         var mockCreatorsService = new Mock<ICreatorsService>();
@@ -108,9 +109,9 @@ public class TestCreatorsController
         // Assert
         result.Result
                 .Should()
-                .BeOfType<NotFoundResult>()
+                .BeOfType<NoContentResult>()
                 .Which.StatusCode
                 .Should()
-                .Be(404);
+                .Be(StatusCodes.Status204NoContent);
     }
 }

@@ -1,5 +1,8 @@
 using ContentAddicts.Api.Models;
-using ContentAddicts.Api.Services;
+using ContentAddicts.Api.UseCases.Creators.Get;
+using ContentAddicts.Api.UseCases.Creators.GetAll;
+
+using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,19 +12,19 @@ namespace ContentAddicts.Api.Controllers;
 [ApiController]
 public class CreatorsController : ControllerBase
 {
-    private readonly ICreatorsService _creatorsService;
+    private readonly IMediator _mediatr;
 
-    public CreatorsController(ICreatorsService creatorsService)
+    public CreatorsController(IMediator mediatr)
     {
-        _creatorsService = creatorsService;
+        _mediatr = mediatr;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Creator>>> GetCreators()
     {
-        IEnumerable<Creator> creators = await _creatorsService.GetCreators();
+        List<Creator> creators = await _mediatr.Send(new GetAllCreatorsQuery());
 
-        if (!creators.Any()) return NoContent();
+        if (creators.Count == 0) return NoContent();
 
         return Ok(creators);
     }
@@ -29,7 +32,7 @@ public class CreatorsController : ControllerBase
     [HttpGet("{creatorId:guid}")]
     public async Task<ActionResult<Creator>> GetCreator(Guid creatorId)
     {
-        Creator? creator = await _creatorsService.GetCreator(creatorId);
+        Creator? creator = await _mediatr.Send(new GetCreatorQuery(creatorId));
 
         if (creator is null) return NotFound();
 

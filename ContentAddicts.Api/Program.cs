@@ -1,11 +1,12 @@
-using ContentAddicts.Api.Services;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddTransient<ICreatorsService, CreatorsService>();
+builder.Services.AddMediatR(cfg =>
+        cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
 
 var app = builder.Build();
 

@@ -1,7 +1,10 @@
 using ContentAddicts.Api.Controllers;
 using ContentAddicts.Api.Models;
-using ContentAddicts.Api.Services;
+using ContentAddicts.Api.UseCases.Creators.Get;
+using ContentAddicts.Api.UseCases.Creators.GetAll;
 using ContentAddicts.Tests.Fixtures;
+
+using MediatR;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,13 +25,13 @@ public class TestCreatorsController
     public async Task GetCreators_OnSuccess_ReturnsStatusCode200()
     {
         // Arrange
-        var mockCreatorsService = new Mock<ICreatorsService>();
+        var mockMediatr = new Mock<IMediator>();
 
-        mockCreatorsService
-                .Setup(service => service.GetCreators())
+        mockMediatr
+                .Setup(mediatr => mediatr.Send(new GetAllCreatorsQuery(), default))
                 .ReturnsAsync(Fixture.CreatorsTestData);
 
-        var sut = new CreatorsController(mockCreatorsService.Object);
+        var sut = new CreatorsController(mockMediatr.Object);
 
         // Act
         var result = await sut.GetCreators();
@@ -46,21 +49,21 @@ public class TestCreatorsController
     public async Task GetCreators_OnSuccess_InvokesCreatorsServiceExactlyOnce()
     {
         // Arrange
-        var mockCreatorsService = new Mock<ICreatorsService>();
+        var mockMediatr = new Mock<IMediator>();
 
-        mockCreatorsService
-                .Setup(service => service.GetCreators())
+        mockMediatr
+                .Setup(mediatr => mediatr.Send(new GetAllCreatorsQuery(), default))
                 .ReturnsAsync([]);
 
-        var sut = new CreatorsController(mockCreatorsService.Object);
+        var sut = new CreatorsController(mockMediatr.Object);
 
         // Act
         await sut.GetCreators();
 
         // Assert
-        mockCreatorsService
-                .Verify(service =>
-                    service.GetCreators(),
+        mockMediatr
+                .Verify(mediatr =>
+                    mediatr.Send(new GetAllCreatorsQuery(), default),
                     Times.Once()
                 );
     }
@@ -69,13 +72,13 @@ public class TestCreatorsController
     public async Task GetCreators_OnSuccess_ReturnsListOfCreators()
     {
         // Arrange
-        var mockCreatorsService = new Mock<ICreatorsService>();
+        var mockMediatr = new Mock<IMediator>();
 
-        mockCreatorsService
-                .Setup(service => service.GetCreators())
+        mockMediatr
+                .Setup(mediatr => mediatr.Send(new GetAllCreatorsQuery(), default))
                 .ReturnsAsync(Fixture.CreatorsTestData);
 
-        var sut = new CreatorsController(mockCreatorsService.Object);
+        var sut = new CreatorsController(mockMediatr.Object);
 
         // Act
         var result = await sut.GetCreators();
@@ -95,13 +98,13 @@ public class TestCreatorsController
     public async Task GetCreators_OnNoCreatorsFound_Returns204()
     {
         // Arrange
-        var mockCreatorsService = new Mock<ICreatorsService>();
+        var mockMediatr = new Mock<IMediator>();
 
-        mockCreatorsService
-                .Setup(service => service.GetCreators())
+        mockMediatr
+                .Setup(mediatr => mediatr.Send(new GetAllCreatorsQuery(), default))
                 .ReturnsAsync([]);
 
-        var sut = new CreatorsController(mockCreatorsService.Object);
+        var sut = new CreatorsController(mockMediatr.Object);
 
         // Act
         var result = await sut.GetCreators();
@@ -119,13 +122,13 @@ public class TestCreatorsController
     public async Task GetCreator_OnSuccess_ReturnsStatusCode200()
     {
         // Arrange
-        var mockCreatorsService = new Mock<ICreatorsService>();
+        var mockMediatr = new Mock<IMediator>();
 
-        mockCreatorsService
-                .Setup(service => service.GetCreator(It.IsNotNull<Guid>()))
+        mockMediatr
+                .Setup(mediatr => mediatr.Send(new GetCreatorQuery(It.IsNotNull<Guid>()), default))
                 .ReturnsAsync(new Creator());
 
-        var sut = new CreatorsController(mockCreatorsService.Object);
+        var sut = new CreatorsController(mockMediatr.Object);
         var id = It.IsNotNull<Guid>();
 
         // Act
@@ -144,22 +147,22 @@ public class TestCreatorsController
     public async Task GetCreator_OnSuccess_InvokesCreatorsServiceExactlyOnce()
     {
         // Arrange
-        var mockCreatorsService = new Mock<ICreatorsService>();
+        var mockMediatr = new Mock<IMediator>();
 
-        mockCreatorsService
-                .Setup(service => service.GetCreator(It.IsNotNull<Guid>()))
+        mockMediatr
+                .Setup(mediatr => mediatr.Send(new GetCreatorQuery(It.IsNotNull<Guid>()), default))
                 .ReturnsAsync(new Creator());
 
-        var sut = new CreatorsController(mockCreatorsService.Object);
+        var sut = new CreatorsController(mockMediatr.Object);
         var id = It.IsNotNull<Guid>();
 
         // Act
         await sut.GetCreator(id);
 
         // Assert
-        mockCreatorsService
-                .Verify(service =>
-                    service.GetCreator(It.IsNotNull<Guid>()),
+        mockMediatr
+                .Verify(mediatr =>
+                    mediatr.Send(new GetCreatorQuery(It.IsNotNull<Guid>()), default),
                     Times.Once
                 );
     }
@@ -168,13 +171,13 @@ public class TestCreatorsController
     public async Task GetCreator_OnSuccess_ReturnsACreator()
     {
         // Arrange
-        var mockCreatorsService = new Mock<ICreatorsService>();
+        var mockMediatr = new Mock<IMediator>();
 
-        mockCreatorsService
-                .Setup(service => service.GetCreator(It.IsNotNull<Guid>()))
+        mockMediatr
+                .Setup(mediatr => mediatr.Send(new GetCreatorQuery(It.IsNotNull<Guid>()), default))
                 .ReturnsAsync(new Creator());
 
-        var sut = new CreatorsController(mockCreatorsService.Object);
+        var sut = new CreatorsController(mockMediatr.Object);
         var id = It.IsNotNull<Guid>();
 
         // Act
@@ -195,12 +198,12 @@ public class TestCreatorsController
     public async Task GetCreator_OnNoCreatorFound_Returns404()
     {
         // Arrange
-        var mockCreatorsService = new Mock<ICreatorsService>();
-        mockCreatorsService
-                .Setup(service => service.GetCreator(It.IsNotNull<Guid>()))
+        var mockMediatr = new Mock<IMediator>();
+        mockMediatr
+                .Setup(mediatr => mediatr.Send(new GetCreatorQuery(It.IsNotNull<Guid>()), default))
                 .ReturnsAsync((Creator?)null);
 
-        var sut = new CreatorsController(mockCreatorsService.Object);
+        var sut = new CreatorsController(mockMediatr.Object);
         var id = It.IsNotNull<Guid>();
 
         // Act

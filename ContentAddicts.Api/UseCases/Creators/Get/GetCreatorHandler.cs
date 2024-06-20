@@ -1,13 +1,14 @@
+using ContentAddicts.Api.Contexts;
 using ContentAddicts.Api.Models;
 
 using MediatR;
 
 namespace ContentAddicts.Api.UseCases.Creators.Get;
 
-public class GetCreatorHandler() : IRequestHandler<GetCreatorQuery, Creator?>
+public class GetCreatorHandler(AppDbContext context) : IRequestHandler<GetCreatorQuery, Creator?>
 {
-    public Task<Creator?> Handle(GetCreatorQuery request, CancellationToken cancellationToken)
+    public async Task<Creator?> Handle(GetCreatorQuery request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await context.Creators.FindAsync([request.CreatorId], cancellationToken);
     }
 }

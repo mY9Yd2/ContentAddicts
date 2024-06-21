@@ -91,7 +91,10 @@ public class TestCreatorsController
                 .Should()
                 .NotBeNull()
                 .And
-                .BeAssignableTo<IEnumerable<Creator>>();
+                .BeAssignableTo<IEnumerable<Creator>>()
+                .Which
+                .Should()
+                .NotBeNullOrEmpty();
     }
 
     [Fact]

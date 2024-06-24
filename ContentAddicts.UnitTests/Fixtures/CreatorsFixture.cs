@@ -1,6 +1,6 @@
 using ContentAddicts.Api.Models;
 
-namespace ContentAddicts.Tests.Fixtures;
+namespace ContentAddicts.UnitTests.Fixtures;
 
 public class CreatorsFixture
 {

@@ -2,14 +2,14 @@ using ContentAddicts.Api.Controllers;
 using ContentAddicts.Api.Models;
 using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
-using ContentAddicts.Tests.Fixtures;
+using ContentAddicts.UnitTests.Fixtures;
 
 using MediatR;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ContentAddicts.Tests.Systems.Controllers;
+namespace ContentAddicts.UnitTests.Systems.Controllers;
 
 [Collection("Creators collection")]
 public class TestCreatorsController

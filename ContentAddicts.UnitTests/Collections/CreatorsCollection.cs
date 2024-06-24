@@ -1,6 +1,6 @@
-using ContentAddicts.Tests.Fixtures;
+using ContentAddicts.UnitTests.Fixtures;
 
-namespace ContentAddicts.Tests.Collections;
+namespace ContentAddicts.UnitTests.Collections;
 
 [CollectionDefinition("Creators collection")]
 public class CreatorsCollection

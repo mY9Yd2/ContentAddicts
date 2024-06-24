@@ -3,7 +3,7 @@ using ContentAddicts.Api.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace ContentAddicts.Tests.Fixtures;
+namespace ContentAddicts.UnitTests.Fixtures;
 
 public class AppDbContextFixture
 {

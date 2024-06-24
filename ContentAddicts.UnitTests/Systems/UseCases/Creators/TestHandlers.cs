@@ -1,10 +1,10 @@
 using ContentAddicts.Api.Models;
 using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
-using ContentAddicts.Tests.Fixtures;
-using ContentAddicts.Tests.Utils;
+using ContentAddicts.UnitTests.Fixtures;
+using ContentAddicts.UnitTests.Utils;
 
-namespace ContentAddicts.Tests.Systems.UseCases.Creators;
+namespace ContentAddicts.UnitTests.Systems.UseCases.Creators;
 
 public class TestHandlers
         : IClassFixture<AppDbContextFixture>, IClassFixture<AppDbContextFaker>

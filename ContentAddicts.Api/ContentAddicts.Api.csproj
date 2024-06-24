@@ -8,7 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="ContentAddicts.Tests" />
+    <InternalsVisibleTo Include="ContentAddicts.UnitTests" />
+    <InternalsVisibleTo Include="ContentAddicts.IntegrationTests" />
   </ItemGroup>
 
   <ItemGroup>

@@ -10,8 +10,8 @@ using Respawn;
 
 namespace ContentAddicts.IntegrationTests.Fixtures;
 
-public class ContentAddictsWebApplicationFactoryFixture<TProgram>
-    : WebApplicationFactory<TProgram> where TProgram : class
+public class ContentAddictsWebApplicationFactoryFixture<TProgram> :
+        WebApplicationFactory<TProgram> where TProgram : class
 {
     private readonly string _connectionString;
 

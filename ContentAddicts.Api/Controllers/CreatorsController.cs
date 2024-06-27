@@ -1,4 +1,5 @@
-using ContentAddicts.Api.Models;
+using ContentAddicts.Api.UseCases.Creators;
+using ContentAddicts.Api.UseCases.Creators.Create;
 using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
 
@@ -20,9 +21,9 @@ public class CreatorsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Creator>>> GetCreators()
+    public async Task<ActionResult<IEnumerable<GetAllCreatorsDto>>> GetCreators()
     {
-        List<Creator> creators = await _mediatr.Send(new GetAllCreatorsQuery());
+        List<GetAllCreatorsDto> creators = await _mediatr.Send(new GetAllCreatorsQuery());
 
         if (creators.Count == 0) return NoContent();
 
@@ -30,12 +31,24 @@ public class CreatorsController : ControllerBase
     }
 
     [HttpGet("{creatorId:guid}")]
-    public async Task<ActionResult<Creator>> GetCreator(Guid creatorId)
+    public async Task<ActionResult<GetCreatorDto>> GetCreator(Guid creatorId)
     {
-        Creator? creator = await _mediatr.Send(new GetCreatorQuery(creatorId));
+        GetCreatorDto? creator = await _mediatr.Send(new GetCreatorQuery(creatorId));
 
         if (creator is null) return NotFound();
 
         return Ok(creator);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<GetCreatorDto>> CreateCreator(CreateCreatorCommand command)
+    {
+        GetCreatorDto creator = await _mediatr.Send(command);
+
+        return CreatedAtAction(
+            nameof(GetCreator),
+            new { creatorId = creator.Id },
+            creator
+        );
     }
 }

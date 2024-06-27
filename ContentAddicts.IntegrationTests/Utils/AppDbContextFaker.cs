@@ -1,6 +1,6 @@
 using ContentAddicts.Api.UseCases.Creators;
 
-namespace ContentAddicts.UnitTests.Utils;
+namespace ContentAddicts.IntegrationTests.Utils;
 
 public class AppDbContextFaker
 {

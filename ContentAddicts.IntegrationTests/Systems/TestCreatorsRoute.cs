@@ -2,28 +2,33 @@ using System.Net;
 using System.Net.Http.Json;
 
 using ContentAddicts.Api.Contexts;
-using ContentAddicts.Api.Models;
+using ContentAddicts.Api.UseCases.Creators;
 using ContentAddicts.IntegrationTests.Fixtures;
+using ContentAddicts.IntegrationTests.Utils;
 
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ContentAddicts.IntegrationTests.Systems;
 
-public class TestCreatorsRoute
-    : IClassFixture<ContentAddictsWebApplicationFactoryFixture<Program>>
+public class TestCreatorsRoute :
+        IClassFixture<ContentAddictsWebApplicationFactoryFixture<Program>>,
+        IClassFixture<AppDbContextFaker>
 {
+    private readonly AppDbContextFaker _contextFaker;
     private readonly HttpClient _client;
     private readonly ContentAddictsWebApplicationFactoryFixture<Program> _factory;
 
     public TestCreatorsRoute(
-            ContentAddictsWebApplicationFactoryFixture<Program> factory)
+            ContentAddictsWebApplicationFactoryFixture<Program> factory,
+            AppDbContextFaker faker)
     {
         _factory = factory;
         _client = _factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false
         });
+        _contextFaker = faker;
     }
 
     [Fact]
@@ -34,11 +39,8 @@ public class TestCreatorsRoute
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
-        var exceptedCreator = new Creator()
-        {
-            Id = Guid.NewGuid()
-        };
-        await context.Creators.AddAsync(exceptedCreator);
+        var exceptedCreator = _contextFaker.CreateCreatorFaker.Generate();
+        await context.Creators.AddAsync(exceptedCreator.ToCreator());
         await context.SaveChangesAsync();
 
         // Act
@@ -52,7 +54,7 @@ public class TestCreatorsRoute
                 .Be(HttpStatusCode.OK);
 
         var content = response.Content
-                .ReadFromJsonAsAsyncEnumerable<Creator>()
+                .ReadFromJsonAsAsyncEnumerable<GetAllCreatorsDto>()
                 .ToBlockingEnumerable()
                 .ToList();
 
@@ -72,11 +74,8 @@ public class TestCreatorsRoute
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
-        var exceptedCreator = new Creator()
-        {
-            Id = Guid.NewGuid()
-        };
-        await context.Creators.AddAsync(exceptedCreator);
+        var exceptedCreator = _contextFaker.CreateCreatorFaker.Generate();
+        await context.Creators.AddAsync(exceptedCreator.ToCreator());
         await context.SaveChangesAsync();
 
         // Act
@@ -89,7 +88,35 @@ public class TestCreatorsRoute
                 .Should()
                 .Be(HttpStatusCode.OK);
 
-        var content = await response.Content.ReadFromJsonAsync<Creator>();
+        var content = await response.Content.ReadFromJsonAsync<GetCreatorDto>();
+
+        content.Should()
+                .NotBeNull()
+                .And
+                .BeEquivalentTo(exceptedCreator);
+    }
+
+    [Fact]
+    public async Task CreateCreator_OnSuccess_ReturnsACreator()
+    {
+        // Arrange
+        using var scope = _factory.Services.CreateScope();
+        var scopedServices = scope.ServiceProvider;
+        var context = scopedServices.GetRequiredService<AppDbContext>();
+
+        var exceptedCreator = _contextFaker.CreateCreatorFaker.Generate();
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/creators", exceptedCreator);
+
+        await _factory.ResetDatabaseAsync(context);
+
+        // Assert
+        response.StatusCode
+                .Should()
+                .Be(HttpStatusCode.Created);
+
+        var content = await response.Content.ReadFromJsonAsync<GetCreatorDto>();
 
         content.Should()
                 .NotBeNull()

@@ -1,14 +1,18 @@
 using ContentAddicts.Api.Contexts;
-using ContentAddicts.Api.Models;
 
 using MediatR;
 
+using Microsoft.EntityFrameworkCore;
+
 namespace ContentAddicts.Api.UseCases.Creators.Get;
 
-public class GetCreatorHandler(AppDbContext context) : IRequestHandler<GetCreatorQuery, Creator?>
+public class GetCreatorHandler(AppDbContext context) : IRequestHandler<GetCreatorQuery, GetCreatorDto?>
 {
-    public async Task<Creator?> Handle(GetCreatorQuery request, CancellationToken cancellationToken)
+    public async Task<GetCreatorDto?> Handle(GetCreatorQuery request, CancellationToken cancellationToken)
     {
-        return await context.Creators.FindAsync([request.CreatorId], cancellationToken);
+        return await context.Creators.Select(c => new GetCreatorDto()
+        {
+            Id = c.Id
+        }).FirstOrDefaultAsync(cancellationToken);
     }
 }

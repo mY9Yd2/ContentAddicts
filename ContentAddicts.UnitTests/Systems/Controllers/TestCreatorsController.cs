@@ -1,5 +1,6 @@
 using ContentAddicts.Api.Controllers;
-using ContentAddicts.Api.Models;
+using ContentAddicts.Api.UseCases.Creators;
+using ContentAddicts.Api.UseCases.Creators.Create;
 using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
 using ContentAddicts.UnitTests.Utils;
@@ -13,12 +14,12 @@ namespace ContentAddicts.UnitTests.Systems.Controllers;
 
 public class TestCreatorsController : IClassFixture<AppDbContextFaker>
 {
-    public AppDbContextFaker ContextFaker { get; }
+    private readonly AppDbContextFaker _contextFaker;
     private readonly Mock<IMediator> _mockMediatr;
 
     public TestCreatorsController(AppDbContextFaker faker)
     {
-        ContextFaker = faker;
+        _contextFaker = faker;
         _mockMediatr = new Mock<IMediator>();
     }
 
@@ -28,7 +29,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(new GetAllCreatorsQuery(), default))
-                .ReturnsAsync(ContextFaker.CreatorFaker.Generate(1));
+                .ReturnsAsync(_contextFaker.GetAllCreatorsFaker.Generate(1));
 
         var sut = new CreatorsController(_mockMediatr.Object);
 
@@ -45,7 +46,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
     }
 
     [Fact]
-    public async Task GetCreators_OnSuccess_InvokesCreatorsServiceExactlyOnce()
+    public async Task GetCreators_OnSuccess_SendAQueryExactlyOnce()
     {
         // Arrange
         _mockMediatr
@@ -71,7 +72,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(new GetAllCreatorsQuery(), default))
-                .ReturnsAsync(ContextFaker.CreatorFaker.Generate(1));
+                .ReturnsAsync(_contextFaker.GetAllCreatorsFaker.Generate(1));
 
         var sut = new CreatorsController(_mockMediatr.Object);
 
@@ -86,7 +87,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
                 .Should()
                 .NotBeNull()
                 .And
-                .BeAssignableTo<IEnumerable<Creator>>()
+                .BeAssignableTo<IEnumerable<GetAllCreatorsDto>>()
                 .Which
                 .Should()
                 .NotBeNullOrEmpty();
@@ -120,7 +121,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(new GetCreatorQuery(It.IsNotNull<Guid>()), default))
-                .ReturnsAsync(new Creator());
+                .ReturnsAsync(new GetCreatorDto());
 
         var sut = new CreatorsController(_mockMediatr.Object);
         var id = It.IsNotNull<Guid>();
@@ -138,12 +139,12 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
     }
 
     [Fact]
-    public async Task GetCreator_OnSuccess_InvokesCreatorsServiceExactlyOnce()
+    public async Task GetCreator_OnSuccess_SendAQueryExactlyOnce()
     {
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(new GetCreatorQuery(It.IsNotNull<Guid>()), default))
-                .ReturnsAsync(new Creator());
+                .ReturnsAsync(new GetCreatorDto());
 
         var sut = new CreatorsController(_mockMediatr.Object);
         var id = It.IsNotNull<Guid>();
@@ -165,7 +166,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(new GetCreatorQuery(It.IsNotNull<Guid>()), default))
-                .ReturnsAsync(new Creator());
+                .ReturnsAsync(new GetCreatorDto());
 
         var sut = new CreatorsController(_mockMediatr.Object);
         var id = It.IsNotNull<Guid>();
@@ -181,7 +182,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
                 .Should()
                 .NotBeNull()
                 .And
-                .BeAssignableTo<Creator>();
+                .BeAssignableTo<GetCreatorDto>();
     }
 
     [Fact]
@@ -190,7 +191,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(new GetCreatorQuery(It.IsNotNull<Guid>()), default))
-                .ReturnsAsync((Creator?)null);
+                .ReturnsAsync((GetCreatorDto?)null);
 
         var sut = new CreatorsController(_mockMediatr.Object);
         var id = It.IsNotNull<Guid>();
@@ -205,5 +206,100 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
                 .Which.StatusCode
                 .Should()
                 .Be(StatusCodes.Status404NotFound);
+    }
+
+    [Fact]
+    public async Task CreateCreator_OnSuccess_Returns201()
+    {
+        // Arrange
+        _mockMediatr
+                .Setup(mediatr => mediatr.Send(It.IsNotNull<CreateCreatorCommand>(), default))
+                .ReturnsAsync(new GetCreatorDto());
+
+        var command = new CreateCreatorCommand();
+        var sut = new CreatorsController(_mockMediatr.Object);
+
+        // Act
+        var result = await sut.CreateCreator(command);
+
+        // Assert
+        result.Result
+                .Should()
+                .BeOfType<CreatedAtActionResult>()
+                .Which.StatusCode
+                .Should()
+                .Be(StatusCodes.Status201Created);
+    }
+
+    [Fact]
+    public async Task CreateCreator_OnSuccess_SendACommandExactlyOnce()
+    {
+        // Arrange
+        _mockMediatr
+                .Setup(mediatr => mediatr.Send(It.IsNotNull<CreateCreatorCommand>(), default))
+                .ReturnsAsync(new GetCreatorDto());
+
+        var command = new CreateCreatorCommand();
+        var sut = new CreatorsController(_mockMediatr.Object);
+
+        // Act
+        await sut.CreateCreator(command);
+
+        // Assert
+        _mockMediatr
+                .Verify(mediatr =>
+                    mediatr.Send(command, default),
+                    Times.Once()
+                );
+    }
+
+    [Fact]
+    public async Task CreateCreator_OnSuccess_ReturnsACreator()
+    {
+        // Arrange
+        var exceptedCreator = _contextFaker.GetCreatorFaker.Generate();
+
+        _mockMediatr
+                .Setup(mediatr => mediatr.Send(It.IsNotNull<CreateCreatorCommand>(), default))
+                .ReturnsAsync(exceptedCreator);
+
+        var command = new CreateCreatorCommand();
+        var sut = new CreatorsController(_mockMediatr.Object);
+
+        // Act
+        var result = await sut.CreateCreator(command);
+
+        // Assert
+        result.Result
+                .Should()
+                .BeOfType<CreatedAtActionResult>()
+                .Which.Value
+                .Should()
+                .NotBeNull()
+                .And
+                .BeEquivalentTo(exceptedCreator);
+    }
+
+    [Fact]
+    public async Task CreateCreator_WhenTheCreatorExists_Returns409()
+    {
+        // Arrange
+        _mockMediatr
+                .Setup(mediatr => mediatr.Send(It.IsNotNull<CreateCreatorCommand>(), default))
+                .ReturnsAsync(new GetCreatorDto());
+
+        var command = new CreateCreatorCommand();
+        var sut = new CreatorsController(_mockMediatr.Object);
+
+        // Act
+        var result = await sut.CreateCreator(command);
+
+        // Assert
+        result.Result
+                .Should()
+                .BeOfType<ConflictObjectResult>()
+                .Which.StatusCode
+                .Should()
+                .Be(StatusCodes.Status409Conflict);
     }
 }

@@ -3,6 +3,8 @@ using ContentAddicts.Api.UseCases.Creators.Create;
 using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
 
+using ErrorOr;
+
 using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
@@ -23,32 +25,43 @@ public class CreatorsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<GetAllCreatorsDto>>> GetCreators()
     {
-        List<GetAllCreatorsDto> creators = await _mediatr.Send(new GetAllCreatorsQuery());
+        ErrorOr<List<GetAllCreatorsDto>> getAllCreatorsResult = await _mediatr.Send(new GetAllCreatorsQuery());
 
-        if (creators.Count == 0) return NoContent();
+        if (getAllCreatorsResult.Value.Count == 0)
+        {
+            return NoContent();
+        }
 
-        return Ok(creators);
+        return Ok(getAllCreatorsResult.Value);
     }
 
     [HttpGet("{creatorId:guid}")]
     public async Task<ActionResult<GetCreatorDto>> GetCreator(Guid creatorId)
     {
-        GetCreatorDto? creator = await _mediatr.Send(new GetCreatorQuery(creatorId));
+        ErrorOr<GetCreatorDto> getCreatorResult = await _mediatr.Send(new GetCreatorQuery(creatorId));
 
-        if (creator is null) return NotFound();
+        if (getCreatorResult.IsError)
+        {
+            return NotFound(getCreatorResult.Errors);
+        }
 
-        return Ok(creator);
+        return Ok(getCreatorResult.Value);
     }
 
     [HttpPost]
     public async Task<ActionResult<GetCreatorDto>> CreateCreator(CreateCreatorCommand command)
     {
-        GetCreatorDto creator = await _mediatr.Send(command);
+        ErrorOr<GetCreatorDto> createCreatorResult = await _mediatr.Send(command);
+
+        if (createCreatorResult.IsError)
+        {
+            return Conflict(createCreatorResult.Errors);
+        }
 
         return CreatedAtAction(
             nameof(GetCreator),
-            new { creatorId = creator.Id },
-            creator
+            new { creatorId = createCreatorResult.Value.Id },
+            createCreatorResult.Value
         );
     }
 }

@@ -45,6 +45,10 @@ public class TestCreatorsRoute :
 
         // Act
         var response = await _client.GetAsync("/api/creators");
+        var content = response.Content
+                .ReadFromJsonAsAsyncEnumerable<GetAllCreatorsDto>()
+                .ToBlockingEnumerable()
+                .ToList();
 
         await _factory.ResetDatabaseAsync(context);
 
@@ -52,11 +56,6 @@ public class TestCreatorsRoute :
         response.StatusCode
                 .Should()
                 .Be(HttpStatusCode.OK);
-
-        var content = response.Content
-                .ReadFromJsonAsAsyncEnumerable<GetAllCreatorsDto>()
-                .ToBlockingEnumerable()
-                .ToList();
 
         content.Should()
                 .HaveCount(1)
@@ -75,11 +74,13 @@ public class TestCreatorsRoute :
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
         var exceptedCreator = _contextFaker.CreateCreatorFaker.Generate();
+        await context.Creators.AddAsync(_contextFaker.CreateCreatorFaker.Generate().ToCreator());
         await context.Creators.AddAsync(exceptedCreator.ToCreator());
         await context.SaveChangesAsync();
 
         // Act
         var response = await _client.GetAsync($"/api/creators/{exceptedCreator.Id}");
+        var content = await response.Content.ReadFromJsonAsync<GetCreatorDto>();
 
         await _factory.ResetDatabaseAsync(context);
 
@@ -87,8 +88,6 @@ public class TestCreatorsRoute :
         response.StatusCode
                 .Should()
                 .Be(HttpStatusCode.OK);
-
-        var content = await response.Content.ReadFromJsonAsync<GetCreatorDto>();
 
         content.Should()
                 .NotBeNull()
@@ -108,6 +107,7 @@ public class TestCreatorsRoute :
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/creators", exceptedCreator);
+        var content = await response.Content.ReadFromJsonAsync<GetCreatorDto>();
 
         await _factory.ResetDatabaseAsync(context);
 
@@ -116,7 +116,13 @@ public class TestCreatorsRoute :
                 .Should()
                 .Be(HttpStatusCode.Created);
 
-        var content = await response.Content.ReadFromJsonAsync<GetCreatorDto>();
+        response.Headers.Location
+                .Should()
+                .NotBeNull()
+                .And.Subject
+                .ToString()
+                .Should()
+                .EndWith($"/api/creators/{exceptedCreator.Id}");
 
         content.Should()
                 .NotBeNull()

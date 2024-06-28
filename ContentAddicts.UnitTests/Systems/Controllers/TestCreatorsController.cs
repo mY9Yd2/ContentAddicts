@@ -5,6 +5,8 @@ using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
 using ContentAddicts.UnitTests.Utils;
 
+using ErrorOr;
+
 using MediatR;
 
 using Microsoft.AspNetCore.Http;
@@ -51,7 +53,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(new GetAllCreatorsQuery(), default))
-                .ReturnsAsync([]);
+                .ReturnsAsync(new List<GetAllCreatorsDto>());
 
         var sut = new CreatorsController(_mockMediatr.Object);
 
@@ -99,7 +101,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(new GetAllCreatorsQuery(), default))
-                .ReturnsAsync([]);
+                .ReturnsAsync(new List<GetAllCreatorsDto>());
 
         var sut = new CreatorsController(_mockMediatr.Object);
 
@@ -191,7 +193,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(new GetCreatorQuery(It.IsNotNull<Guid>()), default))
-                .ReturnsAsync((GetCreatorDto?)null);
+                .ReturnsAsync(Error.NotFound());
 
         var sut = new CreatorsController(_mockMediatr.Object);
         var id = It.IsNotNull<Guid>();
@@ -202,7 +204,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Assert
         result.Result
                 .Should()
-                .BeOfType<NotFoundResult>()
+                .BeOfType<NotFoundObjectResult>()
                 .Which.StatusCode
                 .Should()
                 .Be(StatusCodes.Status404NotFound);
@@ -286,7 +288,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(It.IsNotNull<CreateCreatorCommand>(), default))
-                .ReturnsAsync(new GetCreatorDto());
+                .ReturnsAsync(Error.Conflict());
 
         var command = new CreateCreatorCommand();
         var sut = new CreatorsController(_mockMediatr.Object);

@@ -5,6 +5,8 @@ using ContentAddicts.Api.UseCases.Creators.GetAll;
 using ContentAddicts.UnitTests.Fixtures;
 using ContentAddicts.UnitTests.Utils;
 
+using ErrorOr;
+
 namespace ContentAddicts.UnitTests.Systems.UseCases.Creators;
 
 public class TestHandlers :
@@ -39,7 +41,8 @@ public class TestHandlers :
         context.ChangeTracker.Clear();
 
         // Assert
-        result.Should()
+        result.Value
+                .Should()
                 .NotBeNullOrEmpty()
                 .And
                 .BeAssignableTo<IEnumerable<GetAllCreatorsDto>>();
@@ -58,7 +61,8 @@ public class TestHandlers :
         var result = await sut.Handle(query, default);
 
         // Assert
-        result.Should()
+        result.Value
+                .Should()
                 .NotBeNull()
                 .And
                 .BeEmpty();
@@ -72,8 +76,11 @@ public class TestHandlers :
         await context.Database.BeginTransactionAsync();
 
         var exceptedDto = _contextFaker.GetCreatorFaker.Generate();
+
+        await context.Creators.AddAsync(_contextFaker.GetCreatorFaker.Generate().ToCreator());
         await context.Creators.AddAsync(exceptedDto.ToCreator());
         await context.SaveChangesAsync();
+
         var sut = new GetCreatorHandler(context);
         var query = new GetCreatorQuery(exceptedDto.Id);
 
@@ -83,7 +90,12 @@ public class TestHandlers :
         var result = await sut.Handle(query, default);
 
         // Assert
-        result.Should()
+        result.IsError
+                .Should()
+                .BeFalse();
+
+        result.Value
+                .Should()
                 .NotBeNull()
                 .And
                 .BeOfType<GetCreatorDto>()
@@ -92,7 +104,7 @@ public class TestHandlers :
     }
 
     [Fact]
-    public async Task GetCreator_WhenNoCreatorExists_ReturnsNull()
+    public async Task GetCreator_WhenNoCreatorExists_ReturnsNotFoundError()
     {
         // Arrange
         using var context = _fixture.CreateContext();
@@ -104,7 +116,13 @@ public class TestHandlers :
         var result = await sut.Handle(query, default);
 
         // Assert
-        result.Should().BeNull();
+        result.IsError
+                .Should()
+                .BeTrue();
+
+        result.Errors
+                .Should()
+                .Contain(e => e.Type == ErrorType.NotFound);
     }
 
     [Fact]
@@ -127,11 +145,49 @@ public class TestHandlers :
         context.ChangeTracker.Clear();
 
         // Assert
-        result.Should()
+        result.IsError
+                .Should()
+                .BeFalse();
+
+        result.Value
+                .Should()
                 .NotBeNull()
                 .And
                 .BeOfType<GetCreatorDto>()
                 .And
                 .BeEquivalentTo(exceptedCreator);
+    }
+
+    [Fact]
+    public async Task CreateCreator_WhenCreatorExists_ReturnsConflictError()
+    {
+        // Arrange
+        using var context = _fixture.CreateContext();
+        await context.Database.BeginTransactionAsync();
+
+        var creator = _contextFaker.GetCreatorFaker.Generate().ToCreator();
+
+        await context.Creators.AddAsync(creator);
+        await context.SaveChangesAsync();
+
+        var sut = new CreateCreatorHandler(context);
+        var query = new CreateCreatorCommand()
+        {
+            Id = creator.Id
+        };
+
+        // Act
+        var result = await sut.Handle(query, default);
+
+        context.ChangeTracker.Clear();
+
+        // Assert
+        result.IsError
+                .Should()
+                .BeTrue();
+
+        result.Errors
+                .Should()
+                .Contain(e => e.Type == ErrorType.Conflict);
     }
 }

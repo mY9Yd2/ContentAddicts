@@ -27,6 +27,9 @@ public class CreateCreatorHandler(AppDbContext context) : IRequestHandler<Create
         await context.Creators.AddAsync(creator, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
-        return creator.ToGetCreatorDto();
+        return new GetCreatorDto()
+        {
+            Id = creator.Id
+        };
     }
 }

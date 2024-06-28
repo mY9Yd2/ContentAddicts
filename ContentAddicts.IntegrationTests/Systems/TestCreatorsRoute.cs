@@ -4,7 +4,8 @@ using System.Net.Http.Json;
 using ContentAddicts.Api.Contexts;
 using ContentAddicts.Api.UseCases.Creators;
 using ContentAddicts.IntegrationTests.Fixtures;
-using ContentAddicts.IntegrationTests.Utils;
+using ContentAddicts.SharedTestUtils.Fakers;
+using ContentAddicts.SharedTestUtils.Extensions;
 
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;

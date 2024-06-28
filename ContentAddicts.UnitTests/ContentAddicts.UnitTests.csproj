@@ -11,7 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bogus" Version="35.5.1" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -34,6 +33,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ContentAddicts.Api\ContentAddicts.Api.csproj" />
+    <ProjectReference Include="..\ContentAddicts.SharedTestUtils\ContentAddicts.SharedTestUtils.csproj" />
   </ItemGroup>
 
 </Project>

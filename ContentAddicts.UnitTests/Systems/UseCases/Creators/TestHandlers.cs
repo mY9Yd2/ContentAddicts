@@ -2,8 +2,9 @@ using ContentAddicts.Api.UseCases.Creators;
 using ContentAddicts.Api.UseCases.Creators.Create;
 using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
+using ContentAddicts.SharedTestUtils.Fakers;
+using ContentAddicts.SharedTestUtils.Extensions;
 using ContentAddicts.UnitTests.Fixtures;
-using ContentAddicts.UnitTests.Utils;
 
 using ErrorOr;
 

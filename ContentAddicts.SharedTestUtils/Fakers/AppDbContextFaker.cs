@@ -1,6 +1,8 @@
+using Bogus;
+
 using ContentAddicts.Api.UseCases.Creators;
 
-namespace ContentAddicts.UnitTests.Utils;
+namespace ContentAddicts.SharedTestUtils.Fakers;
 
 public class AppDbContextFaker
 {

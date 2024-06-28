@@ -3,7 +3,7 @@ using ContentAddicts.Api.UseCases.Creators;
 using ContentAddicts.Api.UseCases.Creators.Create;
 using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
-using ContentAddicts.UnitTests.Utils;
+using ContentAddicts.SharedTestUtils.Fakers;
 
 using ErrorOr;
 

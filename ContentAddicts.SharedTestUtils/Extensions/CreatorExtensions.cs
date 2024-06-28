@@ -1,7 +1,7 @@
 using ContentAddicts.Api.Models;
 using ContentAddicts.Api.UseCases.Creators;
 
-namespace ContentAddicts.UnitTests.Utils;
+namespace ContentAddicts.SharedTestUtils.Extensions;
 
 public static class CreatorExtensions
 {
@@ -18,6 +18,14 @@ public static class CreatorExtensions
         return new Creator()
         {
             Id = dto.Id
+        };
+    }
+
+    public static GetCreatorDto ToGetCreatorDto(this Creator creator)
+    {
+        return new GetCreatorDto()
+        {
+            Id = creator.Id
         };
     }
 }

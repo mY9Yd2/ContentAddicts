@@ -14,7 +14,9 @@ public class GetAllCreatorsHandler(AppDbContext context) : IRequestHandler<GetAl
     {
         return await context.Creators.Select(c => new GetAllCreatorsDto()
         {
-            Id = c.Id
+            Id = c.Id,
+            Name = c.Name,
+            OtherNames = c.OtherNames.Select(o => o.Name).ToList()
         }).ToListAsync(cancellationToken);
     }
 }

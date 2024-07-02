@@ -135,13 +135,15 @@ public class TestHandlers :
 
         var sut = new CreateCreatorHandler(context);
         var exceptedCreator = _contextFaker.CreateCreatorFaker.Generate();
-        var query = new CreateCreatorCommand()
+        var command = new CreateCreatorCommand()
         {
-            Id = exceptedCreator.Id
+            Id = exceptedCreator.Id,
+            Name = exceptedCreator.Name,
+            OtherNames = _contextFaker.OtherNameFaker.Generate(2).Select(o => o.Name).ToHashSet()
         };
 
         // Act
-        var result = await sut.Handle(query, default);
+        var result = await sut.Handle(command, default);
 
         context.ChangeTracker.Clear();
 
@@ -156,7 +158,11 @@ public class TestHandlers :
                 .And
                 .BeOfType<GetCreatorDto>()
                 .And
-                .BeEquivalentTo(exceptedCreator);
+                .BeEquivalentTo(exceptedCreator, options => options.Excluding(o => o.OtherNames));
+
+        result.Value.OtherNames
+                .Should()
+                .BeEquivalentTo(command.OtherNames);
     }
 
     [Fact]
@@ -172,13 +178,14 @@ public class TestHandlers :
         await context.SaveChangesAsync();
 
         var sut = new CreateCreatorHandler(context);
-        var query = new CreateCreatorCommand()
+        var command = new CreateCreatorCommand()
         {
-            Id = creator.Id
+            Id = creator.Id,
+            Name = creator.Name
         };
 
         // Act
-        var result = await sut.Handle(query, default);
+        var result = await sut.Handle(command, default);
 
         context.ChangeTracker.Clear();
 

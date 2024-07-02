@@ -21,15 +21,26 @@ public class CreateCreatorHandler(AppDbContext context) : IRequestHandler<Create
 
         var creator = new Creator()
         {
-            Id = command.Id
+            Id = command.Id,
+            Name = command.Name,
         };
+
+        foreach (var name in command.OtherNames)
+        {
+            creator.OtherNames.Add(new OtherName()
+            {
+                Name = name
+            });
+        }
 
         await context.Creators.AddAsync(creator, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
         return new GetCreatorDto()
         {
-            Id = creator.Id
+            Id = creator.Id,
+            Name = creator.Name,
+            OtherNames = creator.OtherNames.Select(o => o.Name).ToList()
         };
     }
 }

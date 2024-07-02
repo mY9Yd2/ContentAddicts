@@ -9,7 +9,8 @@ public static class CreatorExtensions
     {
         return new Creator()
         {
-            Id = dto.Id
+            Id = dto.Id,
+            Name = dto.Name
         };
     }
 
@@ -17,7 +18,8 @@ public static class CreatorExtensions
     {
         return new Creator()
         {
-            Id = dto.Id
+            Id = dto.Id,
+            Name = dto.Name
         };
     }
 
@@ -25,7 +27,8 @@ public static class CreatorExtensions
     {
         return new GetCreatorDto()
         {
-            Id = creator.Id
+            Id = creator.Id,
+            Name = creator.Name
         };
     }
 }

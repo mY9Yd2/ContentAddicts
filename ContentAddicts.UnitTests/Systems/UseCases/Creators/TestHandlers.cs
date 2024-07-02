@@ -1,5 +1,6 @@
 using ContentAddicts.Api.UseCases.Creators;
 using ContentAddicts.Api.UseCases.Creators.Create;
+using ContentAddicts.Api.UseCases.Creators.Delete;
 using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
 using ContentAddicts.SharedTestUtils.Fakers;
@@ -197,5 +198,59 @@ public class TestHandlers :
         result.Errors
                 .Should()
                 .Contain(e => e.Type == ErrorType.Conflict);
+    }
+
+    [Fact]
+    public async Task DeleteCreator_WhenCreatorExists_ReturnsDeletedResult()
+    {
+        // Arrange
+        using var context = _fixture.CreateContext();
+        await context.Database.BeginTransactionAsync();
+
+        var creator = _contextFaker.CreateCreatorFaker.Generate().ToCreator();
+
+        await context.Creators.AddAsync(creator);
+        await context.SaveChangesAsync();
+
+        var sut = new DeleteCreatorHandler(context);
+        var command = new DeleteCreatorCommand(creator.Id);
+
+        // Act
+        var result = await sut.Handle(command, default);
+
+        context.ChangeTracker.Clear();
+
+        // Assert
+        result.IsError
+                .Should()
+                .BeFalse();
+
+        result.Value
+                .Should()
+                .Be(Result.Deleted);
+    }
+
+    [Fact]
+    public async Task DeleteCreator_WhenNoCreatorExists_ReturnsNotFoundError()
+    {
+        // Arrange
+        using var context = _fixture.CreateContext();
+
+        var creator = _contextFaker.CreateCreatorFaker.Generate();
+
+        var sut = new DeleteCreatorHandler(context);
+        var command = new DeleteCreatorCommand(creator.Id);
+
+        // Act
+        var result = await sut.Handle(command, default);
+
+        // Assert
+        result.IsError
+                .Should()
+                .BeTrue();
+
+        result.Errors
+                .Should()
+                .Contain(e => e.Type == ErrorType.NotFound);
     }
 }

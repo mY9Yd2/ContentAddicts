@@ -130,4 +130,28 @@ public class TestCreatorsRoute :
                 .And
                 .BeEquivalentTo(exceptedCreator);
     }
+
+    [Fact]
+    public async Task DeleteCreator_OnSuccess_ReturnsStatusCode204()
+    {
+        // Arrange
+        using var scope = _factory.Services.CreateScope();
+        var scopedServices = scope.ServiceProvider;
+        var context = scopedServices.GetRequiredService<AppDbContext>();
+
+        var creator = _contextFaker.CreateCreatorFaker.Generate();
+        await context.Creators.AddAsync(_contextFaker.CreateCreatorFaker.Generate().ToCreator());
+        await context.Creators.AddAsync(creator.ToCreator());
+        await context.SaveChangesAsync();
+
+        // Act
+        var response = await _client.DeleteAsync($"/api/creators/{creator.Id}");
+
+        await _factory.ResetDatabaseAsync(context);
+
+        // Assert
+        response.StatusCode
+                .Should()
+                .Be(HttpStatusCode.NoContent);
+    }
 }

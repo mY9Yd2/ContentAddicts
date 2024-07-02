@@ -1,5 +1,6 @@
 using ContentAddicts.Api.UseCases.Creators;
 using ContentAddicts.Api.UseCases.Creators.Create;
+using ContentAddicts.Api.UseCases.Creators.Delete;
 using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
 
@@ -63,5 +64,18 @@ public class CreatorsController : ControllerBase
             new { creatorId = createCreatorResult.Value.Id },
             createCreatorResult.Value
         );
+    }
+
+    [HttpDelete("{creatorId:guid}")]
+    public async Task<IActionResult> DeleteCreator(Guid creatorId)
+    {
+        ErrorOr<Deleted> deleteCreatorResult = await _mediatr.Send(new DeleteCreatorCommand(creatorId));
+
+        if (deleteCreatorResult.IsError)
+        {
+            return NotFound(deleteCreatorResult.Errors);
+        }
+
+        return NoContent();
     }
 }

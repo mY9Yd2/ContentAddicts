@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 using ContentAddicts.Api.Contexts;
 using ContentAddicts.Api.Services;
@@ -34,7 +35,9 @@ try
             .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
             .WriteTo.Console());
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+            .AddJsonOptions(cfg =>
+                    cfg.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

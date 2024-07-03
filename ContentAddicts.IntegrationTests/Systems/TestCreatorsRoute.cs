@@ -5,7 +5,6 @@ using ContentAddicts.Api.Contexts;
 using ContentAddicts.Api.UseCases.Creators;
 using ContentAddicts.IntegrationTests.Fixtures;
 using ContentAddicts.SharedTestUtils.Fakers;
-using ContentAddicts.SharedTestUtils.Extensions;
 
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,8 +39,8 @@ public class TestCreatorsRoute :
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
-        var exceptedCreator = _contextFaker.CreateCreatorFaker.Generate();
-        await context.Creators.AddAsync(exceptedCreator.ToCreator());
+        var exceptedCreator = _contextFaker.CreatorFaker.Generate();
+        await context.Creators.AddAsync(exceptedCreator);
         await context.SaveChangesAsync();
 
         // Act
@@ -74,9 +73,9 @@ public class TestCreatorsRoute :
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
-        var exceptedCreator = _contextFaker.CreateCreatorFaker.Generate();
-        await context.Creators.AddAsync(_contextFaker.CreateCreatorFaker.Generate().ToCreator());
-        await context.Creators.AddAsync(exceptedCreator.ToCreator());
+        var exceptedCreator = _contextFaker.CreatorFaker.Generate();
+        await context.Creators.AddAsync(_contextFaker.CreatorFaker.Generate());
+        await context.Creators.AddAsync(exceptedCreator);
         await context.SaveChangesAsync();
 
         // Act
@@ -139,9 +138,9 @@ public class TestCreatorsRoute :
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
-        var creator = _contextFaker.CreateCreatorFaker.Generate();
-        await context.Creators.AddAsync(_contextFaker.CreateCreatorFaker.Generate().ToCreator());
-        await context.Creators.AddAsync(creator.ToCreator());
+        var creator = _contextFaker.CreatorFaker.Generate();
+        await context.Creators.AddAsync(_contextFaker.CreatorFaker.Generate());
+        await context.Creators.AddAsync(creator);
         await context.SaveChangesAsync();
 
         // Act

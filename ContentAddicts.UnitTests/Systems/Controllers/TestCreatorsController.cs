@@ -1,4 +1,5 @@
 using ContentAddicts.Api.Controllers;
+using ContentAddicts.Api.Models;
 using ContentAddicts.Api.UseCases.Creators;
 using ContentAddicts.Api.UseCases.Creators.Create;
 using ContentAddicts.Api.UseCases.Creators.Delete;
@@ -124,7 +125,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(It.IsNotNull<GetCreatorQuery>(), default))
-                .ReturnsAsync(new GetCreatorDto());
+                .ReturnsAsync(It.IsNotNull<GetCreatorDto>());
 
         var sut = new CreatorsController(_mockMediatr.Object);
         var id = It.IsNotNull<Guid>();
@@ -147,7 +148,7 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(It.IsNotNull<GetCreatorQuery>(), default))
-                .ReturnsAsync(new GetCreatorDto());
+                .ReturnsAsync(It.IsNotNull<GetCreatorDto>());
 
         var id = It.IsNotNull<Guid>();
         var query = new GetCreatorQuery(id);
@@ -169,7 +170,12 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(It.IsNotNull<GetCreatorQuery>(), default))
-                .ReturnsAsync(new GetCreatorDto());
+                .ReturnsAsync(new GetCreatorDto()
+                {
+                    Id = It.IsNotNull<Guid>(),
+                    Name = It.IsNotNull<string>(),
+                    Sex = Sex.NotApplicable
+                });
 
         var sut = new CreatorsController(_mockMediatr.Object);
         var id = It.IsNotNull<Guid>();
@@ -217,9 +223,19 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(It.IsNotNull<CreateCreatorCommand>(), default))
-                .ReturnsAsync(new GetCreatorDto());
+                .ReturnsAsync(new GetCreatorDto()
+                {
+                    Id = It.IsNotNull<Guid>(),
+                    Name = It.IsNotNull<string>(),
+                    Sex = Sex.NotApplicable
+                });
 
-        var command = new CreateCreatorCommand();
+        var command = new CreateCreatorCommand()
+        {
+            Id = It.IsNotNull<Guid>(),
+            Name = It.IsNotNull<string>(),
+            Sex = It.IsNotNull<Sex>()
+        };
         var sut = new CreatorsController(_mockMediatr.Object);
 
         // Act
@@ -240,9 +256,19 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
         // Arrange
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(It.IsNotNull<CreateCreatorCommand>(), default))
-                .ReturnsAsync(new GetCreatorDto());
+                .ReturnsAsync(new GetCreatorDto()
+                {
+                    Id = It.IsNotNull<Guid>(),
+                    Name = It.IsNotNull<string>(),
+                    Sex = Sex.NotApplicable
+                });
 
-        var command = new CreateCreatorCommand();
+        var command = new CreateCreatorCommand()
+        {
+            Id = It.IsNotNull<Guid>(),
+            Name = It.IsNotNull<string>(),
+            Sex = It.IsNotNull<Sex>()
+        };
         var sut = new CreatorsController(_mockMediatr.Object);
 
         // Act
@@ -265,7 +291,12 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
                 .Setup(mediatr => mediatr.Send(It.IsNotNull<CreateCreatorCommand>(), default))
                 .ReturnsAsync(exceptedCreator);
 
-        var command = new CreateCreatorCommand();
+        var command = new CreateCreatorCommand()
+        {
+            Id = It.IsNotNull<Guid>(),
+            Name = It.IsNotNull<string>(),
+            Sex = It.IsNotNull<Sex>()
+        };
         var sut = new CreatorsController(_mockMediatr.Object);
 
         // Act
@@ -290,7 +321,12 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
                 .Setup(mediatr => mediatr.Send(It.IsNotNull<CreateCreatorCommand>(), default))
                 .ReturnsAsync(Error.Conflict());
 
-        var command = new CreateCreatorCommand();
+        var command = new CreateCreatorCommand()
+        {
+            Id = It.IsNotNull<Guid>(),
+            Name = It.IsNotNull<string>(),
+            Sex = It.IsNotNull<Sex>()
+        };
         var sut = new CreatorsController(_mockMediatr.Object);
 
         // Act

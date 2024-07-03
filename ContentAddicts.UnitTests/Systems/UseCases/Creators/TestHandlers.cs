@@ -4,7 +4,6 @@ using ContentAddicts.Api.UseCases.Creators.Delete;
 using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
 using ContentAddicts.SharedTestUtils.Fakers;
-using ContentAddicts.SharedTestUtils.Extensions;
 using ContentAddicts.UnitTests.Fixtures;
 
 using ErrorOr;
@@ -31,7 +30,7 @@ public class TestHandlers :
         using var context = _fixture.CreateContext();
         await context.Database.BeginTransactionAsync();
 
-        await context.Creators.AddAsync(_contextFaker.CreateCreatorFaker.Generate().ToCreator());
+        await context.Creators.AddAsync(_contextFaker.CreatorFaker.Generate());
         await context.SaveChangesAsync();
 
         var sut = new GetAllCreatorsHandler(context);
@@ -77,14 +76,14 @@ public class TestHandlers :
         using var context = _fixture.CreateContext();
         await context.Database.BeginTransactionAsync();
 
-        var exceptedDto = _contextFaker.GetCreatorFaker.Generate();
+        var exceptedCreator = _contextFaker.CreatorFaker.Generate();
 
-        await context.Creators.AddAsync(_contextFaker.GetCreatorFaker.Generate().ToCreator());
-        await context.Creators.AddAsync(exceptedDto.ToCreator());
+        await context.Creators.AddAsync(_contextFaker.CreatorFaker.Generate());
+        await context.Creators.AddAsync(exceptedCreator);
         await context.SaveChangesAsync();
 
         var sut = new GetCreatorHandler(context);
-        var query = new GetCreatorQuery(exceptedDto.Id);
+        var query = new GetCreatorQuery(exceptedCreator.Id);
 
         context.ChangeTracker.Clear();
 
@@ -102,7 +101,7 @@ public class TestHandlers :
                 .And
                 .BeOfType<GetCreatorDto>()
                 .And
-                .BeEquivalentTo(exceptedDto);
+                .BeEquivalentTo(exceptedCreator);
     }
 
     [Fact]
@@ -140,7 +139,8 @@ public class TestHandlers :
         {
             Id = exceptedCreator.Id,
             Name = exceptedCreator.Name,
-            OtherNames = _contextFaker.OtherNameFaker.Generate(2).Select(o => o.Name).ToHashSet()
+            OtherNames = _contextFaker.OtherNameFaker.Generate(2).Select(o => o.Name).ToHashSet(),
+            Sex = exceptedCreator.Sex
         };
 
         // Act
@@ -173,7 +173,7 @@ public class TestHandlers :
         using var context = _fixture.CreateContext();
         await context.Database.BeginTransactionAsync();
 
-        var creator = _contextFaker.GetCreatorFaker.Generate().ToCreator();
+        var creator = _contextFaker.CreatorFaker.Generate();
 
         await context.Creators.AddAsync(creator);
         await context.SaveChangesAsync();
@@ -182,7 +182,8 @@ public class TestHandlers :
         var command = new CreateCreatorCommand()
         {
             Id = creator.Id,
-            Name = creator.Name
+            Name = creator.Name,
+            Sex = creator.Sex
         };
 
         // Act
@@ -207,7 +208,7 @@ public class TestHandlers :
         using var context = _fixture.CreateContext();
         await context.Database.BeginTransactionAsync();
 
-        var creator = _contextFaker.CreateCreatorFaker.Generate().ToCreator();
+        var creator = _contextFaker.CreatorFaker.Generate();
 
         await context.Creators.AddAsync(creator);
         await context.SaveChangesAsync();

@@ -23,6 +23,7 @@ public class CreateCreatorHandler(AppDbContext context) : IRequestHandler<Create
         {
             Id = command.Id,
             Name = command.Name,
+            Sex = command.Sex
         };
 
         foreach (var name in command.OtherNames)
@@ -40,7 +41,8 @@ public class CreateCreatorHandler(AppDbContext context) : IRequestHandler<Create
         {
             Id = creator.Id,
             Name = creator.Name,
-            OtherNames = creator.OtherNames.Select(o => o.Name).ToList()
+            OtherNames = creator.OtherNames.Select(o => o.Name).ToList(),
+            Sex = creator.Sex
         };
     }
 }

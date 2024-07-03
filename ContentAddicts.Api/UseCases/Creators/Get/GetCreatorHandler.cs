@@ -17,7 +17,8 @@ public class GetCreatorHandler(AppDbContext context) : IRequestHandler<GetCreato
                 {
                     Id = c.Id,
                     Name = c.Name,
-                    OtherNames = c.OtherNames.Select(o => o.Name).ToList()
+                    OtherNames = c.OtherNames.Select(o => o.Name).ToList(),
+                    Sex = c.Sex
                 })
                 .FirstOrDefaultAsync(c => c.Id == request.CreatorId, cancellationToken);
 

@@ -11,6 +11,12 @@ public static class OtherNameDirector
     public static T BuildRandomOtherName<T>(this IOtherNameBuilder builder) where T : IOtherNameBuilder
     {
         return (T)builder
+                .WithName(F.Internet.UserName());
+    }
+
+    public static T BuildRandomOtherNameUnicode<T>(this IOtherNameBuilder builder) where T : IOtherNameBuilder
+    {
+        return (T)builder
                 .WithName(F.Internet.UserNameUnicode());
     }
 }

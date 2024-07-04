@@ -6,12 +6,12 @@ using ContentAddicts.SharedTestUtils.Interfaces;
 
 namespace ContentAddicts.SharedTestUtils.Directors;
 
-public static class CreatorDirector
+public static class GetCreatorDtoDirector
 {
-    private readonly static Faker F = new() { Random = new(43163) };
+    private readonly static Faker F = new() { Random = new(17205) };
     private readonly static OtherNameBuilder OtherNameBuilder = new();
 
-    public static T BuildRandomCreator<T>(this ICreatorBuilder builder) where T : ICreatorBuilder
+    public static T BuildRandomGetCreatorDto<T>(this IGetCreatorDtoBuilder builder) where T : IGetCreatorDtoBuilder
     {
         return (T)builder
                 .WithId(F.Random.Guid())
@@ -19,9 +19,9 @@ public static class CreatorDirector
                 .WithOtherNames(
                         [
                             OtherNameBuilder.BuildRandomOtherName<OtherNameBuilder>()
-                                    .GetOtherName(),
+                                    .GetOtherName().Name,
                             OtherNameBuilder.BuildRandomOtherNameUnicode<OtherNameBuilder>()
-                                    .GetOtherName()
+                                    .GetOtherName().Name
                         ])
                 .WithSex(F.PickRandom<Sex>());
     }

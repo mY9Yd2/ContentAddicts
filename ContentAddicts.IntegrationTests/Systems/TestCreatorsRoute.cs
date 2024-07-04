@@ -6,7 +6,6 @@ using ContentAddicts.Api.UseCases.Creators;
 using ContentAddicts.IntegrationTests.Fixtures;
 using ContentAddicts.SharedTestUtils.Builders;
 using ContentAddicts.SharedTestUtils.Directors;
-using ContentAddicts.SharedTestUtils.Fakers;
 
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,23 +13,19 @@ using Microsoft.Extensions.DependencyInjection;
 namespace ContentAddicts.IntegrationTests.Systems;
 
 public class TestCreatorsRoute :
-        IClassFixture<ContentAddictsWebApplicationFactoryFixture<Program>>,
-        IClassFixture<AppDbContextFaker>
+        IClassFixture<ContentAddictsWebApplicationFactoryFixture<Program>>
 {
-    private readonly AppDbContextFaker _contextFaker;
     private readonly HttpClient _client;
     private readonly ContentAddictsWebApplicationFactoryFixture<Program> _factory;
 
     public TestCreatorsRoute(
-            ContentAddictsWebApplicationFactoryFixture<Program> factory,
-            AppDbContextFaker faker)
+            ContentAddictsWebApplicationFactoryFixture<Program> factory)
     {
         _factory = factory;
         _client = _factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false
         });
-        _contextFaker = faker;
     }
 
     [Fact]
@@ -109,7 +104,8 @@ public class TestCreatorsRoute :
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
-        var exceptedCreator = _contextFaker.CreateCreatorFaker.Generate();
+        var createCreatorDtoBuilder = new CreateCreatorDtoBuilder();
+        var exceptedCreator = createCreatorDtoBuilder.BuildRandomCreateCreatorDto<CreateCreatorDtoBuilder>().GetCreateCreatorDto();
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/creators", exceptedCreator);

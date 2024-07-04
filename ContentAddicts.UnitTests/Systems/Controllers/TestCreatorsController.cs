@@ -5,7 +5,8 @@ using ContentAddicts.Api.UseCases.Creators.Create;
 using ContentAddicts.Api.UseCases.Creators.Delete;
 using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
-using ContentAddicts.SharedTestUtils.Fakers;
+using ContentAddicts.SharedTestUtils.Builders;
+using ContentAddicts.SharedTestUtils.Directors;
 
 using ErrorOr;
 
@@ -16,14 +17,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ContentAddicts.UnitTests.Systems.Controllers;
 
-public class TestCreatorsController : IClassFixture<AppDbContextFaker>
+public class TestCreatorsController
 {
-    private readonly AppDbContextFaker _contextFaker;
     private readonly Mock<IMediator> _mockMediatr;
 
-    public TestCreatorsController(AppDbContextFaker faker)
+    public TestCreatorsController()
     {
-        _contextFaker = faker;
         _mockMediatr = new Mock<IMediator>();
     }
 
@@ -31,9 +30,15 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
     public async Task GetCreators_OnSuccess_ReturnsStatusCode200()
     {
         // Arrange
+        var getAllCreatorsDtoBuilder = new GetAllCreatorsDtoBuilder();
+
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(It.IsNotNull<GetAllCreatorsQuery>(), default))
-                .ReturnsAsync(_contextFaker.GetAllCreatorsFaker.Generate(1));
+                .ReturnsAsync(new List<GetAllCreatorsDto>
+                        {
+                            getAllCreatorsDtoBuilder.BuildRandomGetAllCreatorsDto<GetAllCreatorsDtoBuilder>()
+                                    .GetGetAllCreatorsDto()
+                        });
 
         var sut = new CreatorsController(_mockMediatr.Object);
 
@@ -74,9 +79,15 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
     public async Task GetCreators_OnSuccess_ReturnsListOfCreators()
     {
         // Arrange
+        var getAllCreatorsDtoBuilder = new GetAllCreatorsDtoBuilder();
+
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(It.IsNotNull<GetAllCreatorsQuery>(), default))
-                .ReturnsAsync(_contextFaker.GetAllCreatorsFaker.Generate(1));
+                .ReturnsAsync(new List<GetAllCreatorsDto>
+                        {
+                            getAllCreatorsDtoBuilder.BuildRandomGetAllCreatorsDto<GetAllCreatorsDtoBuilder>()
+                                    .GetGetAllCreatorsDto()
+                        });
 
         var sut = new CreatorsController(_mockMediatr.Object);
 
@@ -285,7 +296,8 @@ public class TestCreatorsController : IClassFixture<AppDbContextFaker>
     public async Task CreateCreator_OnSuccess_ReturnsACreator()
     {
         // Arrange
-        var exceptedCreator = _contextFaker.GetCreatorFaker.Generate();
+        var getCreatorDtoBuilder = new GetCreatorDtoBuilder();
+        var exceptedCreator = getCreatorDtoBuilder.BuildRandomGetCreatorDto<GetCreatorDtoBuilder>().GetGetCreatorDto();
 
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(It.IsNotNull<CreateCreatorCommand>(), default))

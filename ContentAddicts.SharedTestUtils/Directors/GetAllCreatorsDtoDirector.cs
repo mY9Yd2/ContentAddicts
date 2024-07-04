@@ -1,17 +1,16 @@
 using Bogus;
 
-using ContentAddicts.Api.Models;
 using ContentAddicts.SharedTestUtils.Builders;
 using ContentAddicts.SharedTestUtils.Interfaces;
 
 namespace ContentAddicts.SharedTestUtils.Directors;
 
-public static class CreatorDirector
+public static class GetAllCreatorsDtoDirector
 {
-    private readonly static Faker F = new() { Random = new(43163) };
+    private readonly static Faker F = new() { Random = new(58756) };
     private readonly static OtherNameBuilder OtherNameBuilder = new();
 
-    public static T BuildRandomCreator<T>(this ICreatorBuilder builder) where T : ICreatorBuilder
+    public static T BuildRandomGetAllCreatorsDto<T>(this IGetAllCreatorsDtoBuilder builder) where T : IGetAllCreatorsDtoBuilder
     {
         return (T)builder
                 .WithId(F.Random.Guid())
@@ -19,10 +18,9 @@ public static class CreatorDirector
                 .WithOtherNames(
                         [
                             OtherNameBuilder.BuildRandomOtherName<OtherNameBuilder>()
-                                    .GetOtherName(),
+                                    .GetOtherName().Name,
                             OtherNameBuilder.BuildRandomOtherNameUnicode<OtherNameBuilder>()
-                                    .GetOtherName()
-                        ])
-                .WithSex(F.PickRandom<Sex>());
+                                    .GetOtherName().Name
+                        ]);
     }
 }

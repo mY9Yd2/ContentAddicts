@@ -5,7 +5,6 @@ using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
 using ContentAddicts.SharedTestUtils.Builders;
 using ContentAddicts.SharedTestUtils.Directors;
-using ContentAddicts.SharedTestUtils.Fakers;
 using ContentAddicts.UnitTests.Fixtures;
 
 using ErrorOr;
@@ -13,16 +12,13 @@ using ErrorOr;
 namespace ContentAddicts.UnitTests.Systems.UseCases.Creators;
 
 public class TestHandlers :
-        IClassFixture<AppDbContextFixture>,
-        IClassFixture<AppDbContextFaker>
+        IClassFixture<AppDbContextFixture>
 {
     private readonly AppDbContextFixture _fixture;
-    private readonly AppDbContextFaker _contextFaker;
 
-    public TestHandlers(AppDbContextFixture fixture, AppDbContextFaker faker)
+    public TestHandlers(AppDbContextFixture fixture)
     {
         _fixture = fixture;
-        _contextFaker = faker;
     }
 
     [Fact]
@@ -139,7 +135,10 @@ public class TestHandlers :
         await context.Database.BeginTransactionAsync();
 
         var sut = new CreateCreatorHandler(context);
-        var exceptedCreator = _contextFaker.CreateCreatorFaker.Generate();
+        var createCreatorDtoBuilder = new CreateCreatorDtoBuilder();
+        var exceptedCreator = createCreatorDtoBuilder
+                .BuildRandomCreateCreatorDto<CreateCreatorDtoBuilder>()
+                .GetCreateCreatorDto();
         var otherNameBuilder = new OtherNameBuilder();
         var command = new CreateCreatorCommand()
         {
@@ -147,6 +146,8 @@ public class TestHandlers :
             Name = exceptedCreator.Name,
             OtherNames = [
                 otherNameBuilder.BuildRandomOtherName<OtherNameBuilder>()
+                        .GetOtherName().Name,
+                otherNameBuilder.BuildRandomOtherNameUnicode<OtherNameBuilder>()
                         .GetOtherName().Name
             ],
             Sex = exceptedCreator.Sex
@@ -248,8 +249,10 @@ public class TestHandlers :
         // Arrange
         using var context = _fixture.CreateContext();
 
-        var creator = _contextFaker.CreateCreatorFaker.Generate();
-
+        var createCreatorDtoBuilder = new CreateCreatorDtoBuilder();
+        var creator = createCreatorDtoBuilder
+                .BuildRandomCreateCreatorDto<CreateCreatorDtoBuilder>()
+                .GetCreateCreatorDto();
         var sut = new DeleteCreatorHandler(context);
         var command = new DeleteCreatorCommand(creator.Id);
 

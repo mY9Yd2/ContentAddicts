@@ -30,7 +30,7 @@ public class TestHandlers :
 
         var builder = new CreatorBuilder();
 
-        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().GetCreator());
+        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().Build());
         await context.SaveChangesAsync();
 
         var sut = new GetAllCreatorsHandler(context);
@@ -77,9 +77,9 @@ public class TestHandlers :
         await context.Database.BeginTransactionAsync();
 
         var builder = new CreatorBuilder();
-        var exceptedCreator = builder.BuildRandomCreator<CreatorBuilder>().GetCreator();
+        var exceptedCreator = builder.BuildRandomCreator<CreatorBuilder>().Build();
 
-        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().GetCreator());
+        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().Build());
         await context.Creators.AddAsync(exceptedCreator);
         await context.SaveChangesAsync();
 
@@ -138,7 +138,7 @@ public class TestHandlers :
         var createCreatorDtoBuilder = new CreateCreatorDtoBuilder();
         var exceptedCreator = createCreatorDtoBuilder
                 .BuildRandomCreateCreatorDto<CreateCreatorDtoBuilder>()
-                .GetCreateCreatorDto();
+                .Build();
         var otherNameBuilder = new OtherNameBuilder();
         var command = new CreateCreatorCommand()
         {
@@ -146,9 +146,9 @@ public class TestHandlers :
             Name = exceptedCreator.Name,
             OtherNames = [
                 otherNameBuilder.BuildRandomOtherName<OtherNameBuilder>()
-                        .GetOtherName().Name,
+                        .Build().Name,
                 otherNameBuilder.BuildRandomOtherNameUnicode<OtherNameBuilder>()
-                        .GetOtherName().Name
+                        .Build().Name
             ],
             Sex = exceptedCreator.Sex
         };
@@ -184,7 +184,7 @@ public class TestHandlers :
         await context.Database.BeginTransactionAsync();
 
         var builder = new CreatorBuilder();
-        var creator = builder.BuildRandomCreator<CreatorBuilder>().GetCreator();
+        var creator = builder.BuildRandomCreator<CreatorBuilder>().Build();
 
         await context.Creators.AddAsync(creator);
         await context.SaveChangesAsync();
@@ -220,7 +220,7 @@ public class TestHandlers :
         await context.Database.BeginTransactionAsync();
 
         var builder = new CreatorBuilder();
-        var creator = builder.BuildRandomCreator<CreatorBuilder>().GetCreator();
+        var creator = builder.BuildRandomCreator<CreatorBuilder>().Build();
 
         await context.Creators.AddAsync(creator);
         await context.SaveChangesAsync();
@@ -252,7 +252,7 @@ public class TestHandlers :
         var createCreatorDtoBuilder = new CreateCreatorDtoBuilder();
         var creator = createCreatorDtoBuilder
                 .BuildRandomCreateCreatorDto<CreateCreatorDtoBuilder>()
-                .GetCreateCreatorDto();
+                .Build();
         var sut = new DeleteCreatorHandler(context);
         var command = new DeleteCreatorCommand(creator.Id);
 

@@ -16,7 +16,7 @@ public class CreateCreatorDtoBuilder : ICreateCreatorDtoBuilder
             .UseSeed(5589)
             .StrictMode(true);
 
-    public CreateCreatorDto GetCreateCreatorDto()
+    public CreateCreatorDto Build()
     {
         CreateCreatorDto result = _faker.Generate();
         Reset();

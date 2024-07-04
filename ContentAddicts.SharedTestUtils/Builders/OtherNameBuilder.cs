@@ -18,7 +18,7 @@ public class OtherNameBuilder : IOtherNameBuilder
                     .Ignore(o => o.CreatorId)
                     .Ignore(o => o.Creator);
 
-    public OtherName GetOtherName()
+    public OtherName Build()
     {
         OtherName result = _faker.Generate();
         Reset();

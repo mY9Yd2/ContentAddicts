@@ -37,7 +37,7 @@ public class TestCreatorsController
                 .ReturnsAsync(new List<GetAllCreatorsDto>
                         {
                             getAllCreatorsDtoBuilder.BuildRandomGetAllCreatorsDto<GetAllCreatorsDtoBuilder>()
-                                    .GetGetAllCreatorsDto()
+                                    .Build()
                         });
 
         var sut = new CreatorsController(_mockMediatr.Object);
@@ -86,7 +86,7 @@ public class TestCreatorsController
                 .ReturnsAsync(new List<GetAllCreatorsDto>
                         {
                             getAllCreatorsDtoBuilder.BuildRandomGetAllCreatorsDto<GetAllCreatorsDtoBuilder>()
-                                    .GetGetAllCreatorsDto()
+                                    .Build()
                         });
 
         var sut = new CreatorsController(_mockMediatr.Object);
@@ -297,7 +297,7 @@ public class TestCreatorsController
     {
         // Arrange
         var getCreatorDtoBuilder = new GetCreatorDtoBuilder();
-        var exceptedCreator = getCreatorDtoBuilder.BuildRandomGetCreatorDto<GetCreatorDtoBuilder>().GetGetCreatorDto();
+        var exceptedCreator = getCreatorDtoBuilder.BuildRandomGetCreatorDto<GetCreatorDtoBuilder>().Build();
 
         _mockMediatr
                 .Setup(mediatr => mediatr.Send(It.IsNotNull<CreateCreatorCommand>(), default))

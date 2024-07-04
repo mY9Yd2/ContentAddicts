@@ -15,7 +15,7 @@ public class CreatorBuilder : ICreatorBuilder
             .UseSeed(61146)
             .StrictMode(true);
 
-    public Creator GetCreator()
+    public Creator Build()
     {
         Creator result = _faker.Generate();
         Reset();

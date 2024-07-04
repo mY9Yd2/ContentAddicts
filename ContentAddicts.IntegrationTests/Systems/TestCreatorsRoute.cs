@@ -37,7 +37,7 @@ public class TestCreatorsRoute :
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
         var builder = new CreatorBuilder();
-        var exceptedCreator = builder.BuildRandomCreator<CreatorBuilder>().GetCreator();
+        var exceptedCreator = builder.BuildRandomCreator<CreatorBuilder>().Build();
 
         await context.Creators.AddAsync(exceptedCreator);
         await context.SaveChangesAsync();
@@ -73,9 +73,9 @@ public class TestCreatorsRoute :
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
         var builder = new CreatorBuilder();
-        var exceptedCreator = builder.BuildRandomCreator<CreatorBuilder>().GetCreator();
+        var exceptedCreator = builder.BuildRandomCreator<CreatorBuilder>().Build();
 
-        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().GetCreator());
+        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().Build());
         await context.Creators.AddAsync(exceptedCreator);
         await context.SaveChangesAsync();
 
@@ -105,7 +105,7 @@ public class TestCreatorsRoute :
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
         var createCreatorDtoBuilder = new CreateCreatorDtoBuilder();
-        var exceptedCreator = createCreatorDtoBuilder.BuildRandomCreateCreatorDto<CreateCreatorDtoBuilder>().GetCreateCreatorDto();
+        var exceptedCreator = createCreatorDtoBuilder.BuildRandomCreateCreatorDto<CreateCreatorDtoBuilder>().Build();
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/creators", exceptedCreator);
@@ -141,9 +141,9 @@ public class TestCreatorsRoute :
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
         var builder = new CreatorBuilder();
-        var creator = builder.BuildRandomCreator<CreatorBuilder>().GetCreator();
+        var creator = builder.BuildRandomCreator<CreatorBuilder>().Build();
 
-        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().GetCreator());
+        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().Build());
         await context.Creators.AddAsync(creator);
         await context.SaveChangesAsync();
 

@@ -2,7 +2,7 @@ using ContentAddicts.Api.Models;
 
 namespace ContentAddicts.SharedTestUtils.Interfaces;
 
-public interface ICreatorBuilder
+public interface ICreatorBuilder : IBuilderBase<Creator>
 {
     ICreatorBuilder WithId(Guid id);
     ICreatorBuilder WithName(string name);

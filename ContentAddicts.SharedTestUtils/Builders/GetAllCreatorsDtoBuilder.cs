@@ -15,7 +15,7 @@ public class GetAllCreatorsDtoBuilder : IGetAllCreatorsDtoBuilder
             .UseSeed(28532)
             .StrictMode(true);
 
-    public GetAllCreatorsDto GetGetAllCreatorsDto()
+    public GetAllCreatorsDto Build()
     {
         GetAllCreatorsDto result = _faker.Generate();
         Reset();

@@ -18,9 +18,9 @@ public static class GetAllCreatorsDtoDirector
                 .WithOtherNames(
                         [
                             OtherNameBuilder.BuildRandomOtherName<OtherNameBuilder>()
-                                    .GetOtherName().Name,
+                                    .Build().Name,
                             OtherNameBuilder.BuildRandomOtherNameUnicode<OtherNameBuilder>()
-                                    .GetOtherName().Name
+                                    .Build().Name
                         ]);
     }
 }

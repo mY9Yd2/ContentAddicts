@@ -19,9 +19,9 @@ public static class CreatorDirector
                 .WithOtherNames(
                         [
                             OtherNameBuilder.BuildRandomOtherName<OtherNameBuilder>()
-                                    .GetOtherName(),
+                                    .Build(),
                             OtherNameBuilder.BuildRandomOtherNameUnicode<OtherNameBuilder>()
-                                    .GetOtherName()
+                                    .Build()
                         ])
                 .WithSex(F.PickRandom<Sex>());
     }

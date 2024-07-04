@@ -4,6 +4,8 @@ using System.Net.Http.Json;
 using ContentAddicts.Api.Contexts;
 using ContentAddicts.Api.UseCases.Creators;
 using ContentAddicts.IntegrationTests.Fixtures;
+using ContentAddicts.SharedTestUtils.Builders;
+using ContentAddicts.SharedTestUtils.Directors;
 using ContentAddicts.SharedTestUtils.Fakers;
 
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -39,7 +41,9 @@ public class TestCreatorsRoute :
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
-        var exceptedCreator = _contextFaker.CreatorFaker.Generate();
+        var builder = new CreatorBuilder();
+        var exceptedCreator = builder.BuildRandomCreator<CreatorBuilder>().GetCreator();
+
         await context.Creators.AddAsync(exceptedCreator);
         await context.SaveChangesAsync();
 
@@ -58,7 +62,7 @@ public class TestCreatorsRoute :
                 .Be(HttpStatusCode.OK);
 
         content.Should()
-                .HaveCount(1)
+                .ContainSingle()
                 .And
                 .NotContainNulls()
                 .And
@@ -73,8 +77,10 @@ public class TestCreatorsRoute :
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
-        var exceptedCreator = _contextFaker.CreatorFaker.Generate();
-        await context.Creators.AddAsync(_contextFaker.CreatorFaker.Generate());
+        var builder = new CreatorBuilder();
+        var exceptedCreator = builder.BuildRandomCreator<CreatorBuilder>().GetCreator();
+
+        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().GetCreator());
         await context.Creators.AddAsync(exceptedCreator);
         await context.SaveChangesAsync();
 
@@ -92,7 +98,7 @@ public class TestCreatorsRoute :
         content.Should()
                 .NotBeNull()
                 .And
-                .BeEquivalentTo(exceptedCreator);
+                .BeEquivalentTo(exceptedCreator, options => options.ExcludingMissingMembers());
     }
 
     [Fact]
@@ -138,8 +144,10 @@ public class TestCreatorsRoute :
         var scopedServices = scope.ServiceProvider;
         var context = scopedServices.GetRequiredService<AppDbContext>();
 
-        var creator = _contextFaker.CreatorFaker.Generate();
-        await context.Creators.AddAsync(_contextFaker.CreatorFaker.Generate());
+        var builder = new CreatorBuilder();
+        var creator = builder.BuildRandomCreator<CreatorBuilder>().GetCreator();
+
+        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().GetCreator());
         await context.Creators.AddAsync(creator);
         await context.SaveChangesAsync();
 

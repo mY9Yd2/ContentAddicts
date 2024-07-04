@@ -3,6 +3,8 @@ using ContentAddicts.Api.UseCases.Creators.Create;
 using ContentAddicts.Api.UseCases.Creators.Delete;
 using ContentAddicts.Api.UseCases.Creators.Get;
 using ContentAddicts.Api.UseCases.Creators.GetAll;
+using ContentAddicts.SharedTestUtils.Builders;
+using ContentAddicts.SharedTestUtils.Directors;
 using ContentAddicts.SharedTestUtils.Fakers;
 using ContentAddicts.UnitTests.Fixtures;
 
@@ -30,7 +32,9 @@ public class TestHandlers :
         using var context = _fixture.CreateContext();
         await context.Database.BeginTransactionAsync();
 
-        await context.Creators.AddAsync(_contextFaker.CreatorFaker.Generate());
+        var builder = new CreatorBuilder();
+
+        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().GetCreator());
         await context.SaveChangesAsync();
 
         var sut = new GetAllCreatorsHandler(context);
@@ -76,9 +80,10 @@ public class TestHandlers :
         using var context = _fixture.CreateContext();
         await context.Database.BeginTransactionAsync();
 
-        var exceptedCreator = _contextFaker.CreatorFaker.Generate();
+        var builder = new CreatorBuilder();
+        var exceptedCreator = builder.BuildRandomCreator<CreatorBuilder>().GetCreator();
 
-        await context.Creators.AddAsync(_contextFaker.CreatorFaker.Generate());
+        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().GetCreator());
         await context.Creators.AddAsync(exceptedCreator);
         await context.SaveChangesAsync();
 
@@ -101,7 +106,7 @@ public class TestHandlers :
                 .And
                 .BeOfType<GetCreatorDto>()
                 .And
-                .BeEquivalentTo(exceptedCreator);
+                .BeEquivalentTo(exceptedCreator, options => options.ExcludingMissingMembers());
     }
 
     [Fact]
@@ -135,11 +140,15 @@ public class TestHandlers :
 
         var sut = new CreateCreatorHandler(context);
         var exceptedCreator = _contextFaker.CreateCreatorFaker.Generate();
+        var otherNameBuilder = new OtherNameBuilder();
         var command = new CreateCreatorCommand()
         {
             Id = exceptedCreator.Id,
             Name = exceptedCreator.Name,
-            OtherNames = _contextFaker.OtherNameFaker.Generate(2).Select(o => o.Name).ToHashSet(),
+            OtherNames = [
+                otherNameBuilder.BuildRandomOtherName<OtherNameBuilder>()
+                        .GetOtherName().Name
+            ],
             Sex = exceptedCreator.Sex
         };
 
@@ -173,7 +182,8 @@ public class TestHandlers :
         using var context = _fixture.CreateContext();
         await context.Database.BeginTransactionAsync();
 
-        var creator = _contextFaker.CreatorFaker.Generate();
+        var builder = new CreatorBuilder();
+        var creator = builder.BuildRandomCreator<CreatorBuilder>().GetCreator();
 
         await context.Creators.AddAsync(creator);
         await context.SaveChangesAsync();
@@ -208,7 +218,8 @@ public class TestHandlers :
         using var context = _fixture.CreateContext();
         await context.Database.BeginTransactionAsync();
 
-        var creator = _contextFaker.CreatorFaker.Generate();
+        var builder = new CreatorBuilder();
+        var creator = builder.BuildRandomCreator<CreatorBuilder>().GetCreator();
 
         await context.Creators.AddAsync(creator);
         await context.SaveChangesAsync();

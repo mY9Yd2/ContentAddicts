@@ -33,18 +33,6 @@ public class AppDbContextFaker
                             f.Internet.UserNameUnicode(),
                             f.Internet.UserName()])
             .RuleFor(c => c.Sex, f => f.PickRandom<Sex>());
-    public Faker<OtherName> OtherNameFaker { get; } = new Faker<OtherName>()
-            .UseSeed(Seed)
-            .StrictMode(false)
-            .RuleFor(o => o.Name, f => f.Person.UserName);
-    public Faker<Creator> CreatorFaker { get; } = new Faker<Creator>()
-            .UseSeed(Seed)
-            .StrictMode(true)
-            .RuleFor(c => c.Id, f => f.Random.Guid())
-            .RuleFor(c => c.Name, f => f.Internet.UserName())
-            .RuleFor(c => c.OtherNames, f => [
-                            new() { Name = f.Internet.UserNameUnicode() },
-                            new() { Name = f.Internet.UserName() }])
-            .RuleFor(c => c.Sex, f => f.PickRandom<Sex>());
+
     private static readonly int Seed = 8;
 }

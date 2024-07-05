@@ -3,8 +3,10 @@ using System.Text.Json.Serialization;
 
 using ContentAddicts.Api.Contexts;
 using ContentAddicts.Api.Services;
+using ContentAddicts.Api.Strategies;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 using Serilog;
 using Serilog.Events;
@@ -39,7 +41,30 @@ try
             .AddJsonOptions(cfg =>
                     cfg.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "Content Addicts API",
+                    Description = "Content Addicts is a place to discuss different types of content and its creators, mainly focusing on Youtube, X (formerly Twitter) and others.",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "GitHub Discussions",
+                        Url = new Uri("//github.com/mY9Yd2/ContentAddicts/discussions")
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "MIT",
+                        Url = new Uri("//github.com/mY9Yd2/ContentAddicts/blob/main/LICENSE.md")
+                    }
+                });
+
+                options.CustomSchemaIds(SchemaIdStrategy.CleanStrategy);
+
+                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+            });
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
     builder.Services.AddMediatR(cfg =>

@@ -59,11 +59,11 @@ public class ContentAddictsWebApplicationFactoryFixture<TProgram> :
                 .AddUserSecrets<ContentAddictsWebApplicationFactoryFixture<TProgram>>();
 
         var configuration = builder.Build();
-        string? connectionString = configuration["TestIntegrationDefaultConnectionString"];
+        string? connectionString = configuration["IntegrationTestsConnectionString"];
 
         if (connectionString is null)
         {
-            throw new ArgumentNullException(_connectionString, "TestIntegrationDefaultConnectionString cannot be null!");
+            throw new ArgumentNullException(_connectionString, "IntegrationTestsConnectionString cannot be null!");
         }
 
         return connectionString;

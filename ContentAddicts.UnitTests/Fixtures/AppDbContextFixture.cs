@@ -49,11 +49,11 @@ public class AppDbContextFixture
                 .AddUserSecrets<AppDbContextFixture>();
 
         var configuration = builder.Build();
-        string? connectionString = configuration["TestDefaultConnectionString"];
+        string? connectionString = configuration["UnitTestsConnectionString"];
 
         if (connectionString is null)
         {
-            throw new ArgumentNullException(_connectionString, "TestDefaultConnectionString cannot be null!");
+            throw new ArgumentNullException(_connectionString, "UnitTestsConnectionString cannot be null!");
         }
 
         return connectionString;

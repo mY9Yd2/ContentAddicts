@@ -7,13 +7,13 @@
 ## Setup user-secrets
 
 Using the `dotnet user-secrets` command. [See the docs](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets) or `--help`.  
-The ids can be found in the *.csproj files.
+The `UserSecretsId` can be found in the *.csproj files.
 
 ContentAddicts.Api:  
-`DefaultConnectionString = server=localhost;user=;password=;database=ContentAddicts`
+`dotnet user-secrets set --project ContentAddicts.Api/ "DefaultConnectionString" "server=localhost;user=;password=;database=ContentAddicts"`
 
 ContentAddicts.IntegrationTests:  
-`TestIntegrationDefaultConnectionString = server=localhost;user=;password=;database=ContentAddictsTestIntegration`
+`dotnet user-secrets set --project ContentAddicts.IntegrationTests/ "IntegrationTestsConnectionString" "server=localhost;user=;password=;database=ContentAddictsIntegrationTests"`
 
 ContentAddicts.UnitTests:  
-`TestDefaultConnectionString = server=localhost;user=;password=;database=ContentAddictsTest`
+`dotnet user-secrets set --project ContentAddicts.UnitTests/ "UnitTestsConnectionString" "server=localhost;user=;password=;database=ContentAddictsUnitTests"`

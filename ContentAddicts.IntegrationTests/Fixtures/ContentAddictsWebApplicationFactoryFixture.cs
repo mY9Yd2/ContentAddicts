@@ -56,7 +56,8 @@ public class ContentAddictsWebApplicationFactoryFixture<TProgram> :
     private string GetConnectionString()
     {
         var builder = new ConfigurationBuilder()
-                .AddUserSecrets<ContentAddictsWebApplicationFactoryFixture<TProgram>>();
+                .AddUserSecrets<ContentAddictsWebApplicationFactoryFixture<TProgram>>()
+                .AddEnvironmentVariables("CONTENTADDICTS_");
 
         var configuration = builder.Build();
         string? connectionString = configuration["IntegrationTestsConnectionString"];

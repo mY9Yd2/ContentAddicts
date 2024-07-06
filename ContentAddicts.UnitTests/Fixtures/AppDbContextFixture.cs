@@ -46,7 +46,8 @@ public class AppDbContextFixture
     private string GetConnectionString()
     {
         var builder = new ConfigurationBuilder()
-                .AddUserSecrets<AppDbContextFixture>();
+                .AddUserSecrets<AppDbContextFixture>()
+                .AddEnvironmentVariables("CONTENTADDICTS_");
 
         var configuration = builder.Build();
         string? connectionString = configuration["UnitTestsConnectionString"];

@@ -8,6 +8,11 @@ indent_style = space
 [*.xml]
 indent_size = 2
 
+# YAML files
+[*.yml]
+indent_size = 2
+end_of_line = lf
+
 # C# project files
 [*.csproj]
 indent_size = 2

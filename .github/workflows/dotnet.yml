@@ -7,24 +7,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    services:
-      mariadb:
-        image: mariadb:10.11
-        env:
-          MARIADB_ROOT_PASSWORD: ${{ secrets.MARIADB_ROOT_PASSWORD }}
-          TZ: Europe/Budapest
-        options: >-
-          --health-cmd "/usr/local/bin/healthcheck.sh --connect --innodb_initialized"
-          --health-start-period 15s
-          --health-interval 10s
-          --health-timeout 10s
-          --health-retries 10
-        ports:
-          - ${{ vars.MARIADB_HOST_PORT }}:3306
-
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-mysql@v1
+        with:
+          distribution: "mariadb"
+          mysql-version: "10.11"
+          root-password: ${{ secrets.MARIADB_ROOT_PASSWORD }}
+          my-cnf: |
+            port=${{ vars.MARIADB_HOST_PORT }}
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:

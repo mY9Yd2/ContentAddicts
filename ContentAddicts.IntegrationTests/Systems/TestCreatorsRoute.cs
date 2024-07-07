@@ -13,34 +13,43 @@ using Microsoft.Extensions.DependencyInjection;
 namespace ContentAddicts.IntegrationTests.Systems;
 
 public class TestCreatorsRoute :
-        IClassFixture<ContentAddictsWebApplicationFactoryFixture<Program>>
+        IClassFixture<ContentAddictsWebApplicationFactoryFixture<Program>>,
+        IClassFixture<ScopedServicesFixture>,
+        IAsyncLifetime
 {
     private readonly HttpClient _client;
     private readonly ContentAddictsWebApplicationFactoryFixture<Program> _factory;
+    private readonly AppDbContext _context;
+    private readonly ScopedServicesFixture _scopedServicesFixture;
 
     public TestCreatorsRoute(
-            ContentAddictsWebApplicationFactoryFixture<Program> factory)
+            ContentAddictsWebApplicationFactoryFixture<Program> factory,
+            ScopedServicesFixture scopedServicesFixture)
     {
         _factory = factory;
         _client = _factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false
         });
+
+        _scopedServicesFixture = scopedServicesFixture;
+        _scopedServicesFixture.Scope = _factory.Services.CreateScope();
+        _context = _scopedServicesFixture.ServiceProvider.GetRequiredService<AppDbContext>();
     }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync() => await _factory.ResetDatabaseAsync(_context);
 
     [Fact]
     public async Task GetCreators_OnSuccess_ReturnsListOfCreators()
     {
         // Arrange
-        using var scope = _factory.Services.CreateScope();
-        var scopedServices = scope.ServiceProvider;
-        var context = scopedServices.GetRequiredService<AppDbContext>();
-
         var builder = new CreatorBuilder();
         var exceptedCreator = builder.BuildRandomCreator<CreatorBuilder>().Build();
 
-        await context.Creators.AddAsync(exceptedCreator);
-        await context.SaveChangesAsync();
+        await _context.Creators.AddAsync(exceptedCreator);
+        await _context.SaveChangesAsync();
 
         // Act
         var response = await _client.GetAsync("/api/creators");
@@ -48,8 +57,6 @@ public class TestCreatorsRoute :
                 .ReadFromJsonAsAsyncEnumerable<GetAllCreatorsDto>()
                 .ToBlockingEnumerable()
                 .ToList();
-
-        await _factory.ResetDatabaseAsync(context);
 
         // Assert
         response.StatusCode
@@ -68,22 +75,16 @@ public class TestCreatorsRoute :
     public async Task GetCreator_OnSuccess_ReturnsACreator()
     {
         // Arrange
-        using var scope = _factory.Services.CreateScope();
-        var scopedServices = scope.ServiceProvider;
-        var context = scopedServices.GetRequiredService<AppDbContext>();
-
         var builder = new CreatorBuilder();
         var exceptedCreator = builder.BuildRandomCreator<CreatorBuilder>().Build();
 
-        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().Build());
-        await context.Creators.AddAsync(exceptedCreator);
-        await context.SaveChangesAsync();
+        await _context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().Build());
+        await _context.Creators.AddAsync(exceptedCreator);
+        await _context.SaveChangesAsync();
 
         // Act
         var response = await _client.GetAsync($"/api/creators/{exceptedCreator.Id}");
         var content = await response.Content.ReadFromJsonAsync<GetCreatorDto>();
-
-        await _factory.ResetDatabaseAsync(context);
 
         // Assert
         response.StatusCode
@@ -100,18 +101,12 @@ public class TestCreatorsRoute :
     public async Task CreateCreator_OnSuccess_ReturnsACreator()
     {
         // Arrange
-        using var scope = _factory.Services.CreateScope();
-        var scopedServices = scope.ServiceProvider;
-        var context = scopedServices.GetRequiredService<AppDbContext>();
-
         var createCreatorDtoBuilder = new CreateCreatorDtoBuilder();
         var exceptedCreator = createCreatorDtoBuilder.BuildRandomCreateCreatorDto<CreateCreatorDtoBuilder>().Build();
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/creators", exceptedCreator);
         var content = await response.Content.ReadFromJsonAsync<GetCreatorDto>();
-
-        await _factory.ResetDatabaseAsync(context);
 
         // Assert
         response.StatusCode
@@ -136,21 +131,15 @@ public class TestCreatorsRoute :
     public async Task DeleteCreator_OnSuccess_ReturnsStatusCode204()
     {
         // Arrange
-        using var scope = _factory.Services.CreateScope();
-        var scopedServices = scope.ServiceProvider;
-        var context = scopedServices.GetRequiredService<AppDbContext>();
-
         var builder = new CreatorBuilder();
         var creator = builder.BuildRandomCreator<CreatorBuilder>().Build();
 
-        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().Build());
-        await context.Creators.AddAsync(creator);
-        await context.SaveChangesAsync();
+        await _context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().Build());
+        await _context.Creators.AddAsync(creator);
+        await _context.SaveChangesAsync();
 
         // Act
         var response = await _client.DeleteAsync($"/api/creators/{creator.Id}");
-
-        await _factory.ResetDatabaseAsync(context);
 
         // Assert
         response.StatusCode

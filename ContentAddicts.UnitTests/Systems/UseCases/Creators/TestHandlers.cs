@@ -1,3 +1,4 @@
+using ContentAddicts.Api.Contexts;
 using ContentAddicts.Api.UseCases.Creators;
 using ContentAddicts.Api.UseCases.Creators.Create;
 using ContentAddicts.Api.UseCases.Creators.Delete;
@@ -12,34 +13,43 @@ using ErrorOr;
 namespace ContentAddicts.UnitTests.Systems.UseCases.Creators;
 
 public class TestHandlers :
-        IClassFixture<AppDbContextFixture>
+        IClassFixture<AppDbContextFixture>,
+        IAsyncLifetime
 {
     private readonly AppDbContextFixture _fixture;
+    private readonly AppDbContext _context;
 
     public TestHandlers(AppDbContextFixture fixture)
     {
         _fixture = fixture;
+        _context = _fixture.CreateContext();
+    }
+
+    public async Task InitializeAsync()
+    {
+        await _context.Database.BeginTransactionAsync();
+    }
+
+    public async Task DisposeAsync()
+    {
+        _context.ChangeTracker.Clear();
+        await _context.DisposeAsync();
     }
 
     [Fact]
     public async Task GetAllCreators_WhenHasCreators_ReturnsListOfCreators()
     {
         // Arrange
-        using var context = _fixture.CreateContext();
-        await context.Database.BeginTransactionAsync();
-
         var builder = new CreatorBuilder();
 
-        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().Build());
-        await context.SaveChangesAsync();
+        await _context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().Build());
+        await _context.SaveChangesAsync();
 
-        var sut = new GetAllCreatorsHandler(context);
+        var sut = new GetAllCreatorsHandler(_context);
         var query = new GetAllCreatorsQuery();
 
         // Act
         var result = await sut.Handle(query, default);
-
-        context.ChangeTracker.Clear();
 
         // Assert
         result.Value
@@ -53,9 +63,7 @@ public class TestHandlers :
     public async Task GetAllCreators_WhenHasNoCreators_ReturnsEmptyList()
     {
         // Arrange
-        using var context = _fixture.CreateContext();
-
-        var sut = new GetAllCreatorsHandler(context);
+        var sut = new GetAllCreatorsHandler(_context);
         var query = new GetAllCreatorsQuery();
 
         // Act
@@ -73,20 +81,15 @@ public class TestHandlers :
     public async Task GetCreator_WhenCreatorExists_ReturnsACreator()
     {
         // Arrange
-        using var context = _fixture.CreateContext();
-        await context.Database.BeginTransactionAsync();
-
         var builder = new CreatorBuilder();
         var exceptedCreator = builder.BuildRandomCreator<CreatorBuilder>().Build();
 
-        await context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().Build());
-        await context.Creators.AddAsync(exceptedCreator);
-        await context.SaveChangesAsync();
+        await _context.Creators.AddAsync(builder.BuildRandomCreator<CreatorBuilder>().Build());
+        await _context.Creators.AddAsync(exceptedCreator);
+        await _context.SaveChangesAsync();
 
-        var sut = new GetCreatorHandler(context);
+        var sut = new GetCreatorHandler(_context);
         var query = new GetCreatorQuery(exceptedCreator.Id);
-
-        context.ChangeTracker.Clear();
 
         // Act
         var result = await sut.Handle(query, default);
@@ -109,9 +112,7 @@ public class TestHandlers :
     public async Task GetCreator_WhenNoCreatorExists_ReturnsNotFoundError()
     {
         // Arrange
-        using var context = _fixture.CreateContext();
-
-        var sut = new GetCreatorHandler(context);
+        var sut = new GetCreatorHandler(_context);
         var query = new GetCreatorQuery(It.IsNotNull<Guid>());
 
         // Act
@@ -131,10 +132,7 @@ public class TestHandlers :
     public async Task CreateCreator_OnSuccess_ReturnsACreator()
     {
         // Arrange
-        using var context = _fixture.CreateContext();
-        await context.Database.BeginTransactionAsync();
-
-        var sut = new CreateCreatorHandler(context);
+        var sut = new CreateCreatorHandler(_context);
         var createCreatorDtoBuilder = new CreateCreatorDtoBuilder();
         var exceptedCreator = createCreatorDtoBuilder
                 .BuildRandomCreateCreatorDto<CreateCreatorDtoBuilder>()
@@ -155,8 +153,6 @@ public class TestHandlers :
 
         // Act
         var result = await sut.Handle(command, default);
-
-        context.ChangeTracker.Clear();
 
         // Assert
         result.IsError
@@ -180,16 +176,13 @@ public class TestHandlers :
     public async Task CreateCreator_WhenCreatorExists_ReturnsConflictError()
     {
         // Arrange
-        using var context = _fixture.CreateContext();
-        await context.Database.BeginTransactionAsync();
-
         var builder = new CreatorBuilder();
         var creator = builder.BuildRandomCreator<CreatorBuilder>().Build();
 
-        await context.Creators.AddAsync(creator);
-        await context.SaveChangesAsync();
+        await _context.Creators.AddAsync(creator);
+        await _context.SaveChangesAsync();
 
-        var sut = new CreateCreatorHandler(context);
+        var sut = new CreateCreatorHandler(_context);
         var command = new CreateCreatorCommand()
         {
             Id = creator.Id,
@@ -199,8 +192,6 @@ public class TestHandlers :
 
         // Act
         var result = await sut.Handle(command, default);
-
-        context.ChangeTracker.Clear();
 
         // Assert
         result.IsError
@@ -216,22 +207,17 @@ public class TestHandlers :
     public async Task DeleteCreator_WhenCreatorExists_ReturnsDeletedResult()
     {
         // Arrange
-        using var context = _fixture.CreateContext();
-        await context.Database.BeginTransactionAsync();
-
         var builder = new CreatorBuilder();
         var creator = builder.BuildRandomCreator<CreatorBuilder>().Build();
 
-        await context.Creators.AddAsync(creator);
-        await context.SaveChangesAsync();
+        await _context.Creators.AddAsync(creator);
+        await _context.SaveChangesAsync();
 
-        var sut = new DeleteCreatorHandler(context);
+        var sut = new DeleteCreatorHandler(_context);
         var command = new DeleteCreatorCommand(creator.Id);
 
         // Act
         var result = await sut.Handle(command, default);
-
-        context.ChangeTracker.Clear();
 
         // Assert
         result.IsError
@@ -247,13 +233,11 @@ public class TestHandlers :
     public async Task DeleteCreator_WhenNoCreatorExists_ReturnsNotFoundError()
     {
         // Arrange
-        using var context = _fixture.CreateContext();
-
         var createCreatorDtoBuilder = new CreateCreatorDtoBuilder();
         var creator = createCreatorDtoBuilder
                 .BuildRandomCreateCreatorDto<CreateCreatorDtoBuilder>()
                 .Build();
-        var sut = new DeleteCreatorHandler(context);
+        var sut = new DeleteCreatorHandler(_context);
         var command = new DeleteCreatorCommand(creator.Id);
 
         // Act

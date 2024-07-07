@@ -14,32 +14,32 @@ namespace ContentAddicts.IntegrationTests.Systems;
 
 public class TestCreatorsRoute :
         IClassFixture<ContentAddictsWebApplicationFactoryFixture<Program>>,
-        IClassFixture<ScopedServicesFixture>,
         IAsyncLifetime
 {
     private readonly HttpClient _client;
     private readonly ContentAddictsWebApplicationFactoryFixture<Program> _factory;
     private readonly AppDbContext _context;
-    private readonly ScopedServicesFixture _scopedServicesFixture;
+    private readonly IServiceScope _scopedServices;
 
     public TestCreatorsRoute(
-            ContentAddictsWebApplicationFactoryFixture<Program> factory,
-            ScopedServicesFixture scopedServicesFixture)
+            ContentAddictsWebApplicationFactoryFixture<Program> factory)
     {
         _factory = factory;
         _client = _factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false
         });
-
-        _scopedServicesFixture = scopedServicesFixture;
-        _scopedServicesFixture.Scope = _factory.Services.CreateScope();
-        _context = _scopedServicesFixture.ServiceProvider.GetRequiredService<AppDbContext>();
+        _scopedServices = _factory.Services.CreateScope();
+        _context = _scopedServices.ServiceProvider.GetRequiredService<AppDbContext>();
     }
 
     public Task InitializeAsync() => Task.CompletedTask;
 
-    public async Task DisposeAsync() => await _factory.ResetDatabaseAsync(_context);
+    public async Task DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync(_context);
+        _scopedServices.Dispose();
+    }
 
     [Fact]
     public async Task GetCreators_OnSuccess_ReturnsListOfCreators()

@@ -1,9 +1,14 @@
 using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using ContentAddicts.Api.Behaviors;
 using ContentAddicts.Api.Contexts;
+using ContentAddicts.Api.Policies;
 using ContentAddicts.Api.Services;
 using ContentAddicts.Api.Strategies;
+
+using FluentValidation;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -39,7 +44,12 @@ try
             .WriteTo.Console());
     builder.Services.AddControllers()
             .AddJsonOptions(cfg =>
-                    cfg.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+                    {
+                        cfg.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                        cfg.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                        cfg.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+                    });
+    builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
             {
@@ -68,7 +78,10 @@ try
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
     builder.Services.AddMediatR(cfg =>
-            cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
+            {
+                cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly());
+                cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+            });
     builder.Services.AddDbContext<AppDbContext>(options =>
             {
                 string? connectionString = builder.Configuration["DefaultConnectionString"];
@@ -84,6 +97,8 @@ try
                     options.EnableSensitiveDataLogging();
                 }
             });
+
+    ValidatorOptions.Global.DisplayNameResolver = ValidatorDisplayNamePolicy.CamelCase;
 
     var app = builder.Build();
 
@@ -116,7 +131,7 @@ try
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Application terminated unexpectedly");
+    Log.Fatal(ex, "Application terminated unexpectedly.");
 }
 finally
 {

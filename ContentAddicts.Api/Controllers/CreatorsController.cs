@@ -1,5 +1,6 @@
 using System.Net.Mime;
 
+using ContentAddicts.Api.Extensions;
 using ContentAddicts.Api.UseCases.Creators;
 using ContentAddicts.Api.UseCases.Creators.Create;
 using ContentAddicts.Api.UseCases.Creators.Delete;
@@ -95,14 +96,21 @@ public class CreatorsController : ControllerBase
 
         if (createCreatorResult.IsError)
         {
-            return Conflict(createCreatorResult.Errors);
+            var firstError = createCreatorResult.FirstError;
+
+            if (firstError.Type == ErrorType.Conflict)
+                return Conflict(firstError);
+
+            if (createCreatorResult.Errors.TrueForAll(error => error.Type == ErrorType.Validation))
+                return ValidationProblem(createCreatorResult.Errors.ToModelStateDictionary());
+
+            throw new NotImplementedException($"Error type '{firstError.Type}' is not handled.");
         }
 
         return CreatedAtAction(
-            nameof(GetCreator),
-            new { creatorId = createCreatorResult.Value.Id },
-            createCreatorResult.Value
-        );
+                nameof(GetCreator),
+                new { creatorId = createCreatorResult.Value.Id },
+                createCreatorResult.Value);
     }
 
     /// <summary>

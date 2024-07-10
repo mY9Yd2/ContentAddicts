@@ -15,9 +15,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 using Serilog;
+using Serilog.Enrichers.Sensitive;
 
 var loggerConfiguration = new LoggerConfiguration()
         .Enrich.FromLogContext()
+        .Enrich.WithSensitiveDataMasking(options => options.Mode = MaskingMode.Globally)
         .Enrich.WithProperty("AppVersion", Assembly.GetExecutingAssembly().GetName().Version)
         .Enrich.WithProperty("CLRVersion", Environment.Version)
         .Enrich.WithProperty("FrameworkDescription", RuntimeInformation.FrameworkDescription)
@@ -42,6 +44,7 @@ try
             .ReadFrom.Configuration(builder.Configuration)
             .ReadFrom.Services(services)
             .Enrich.FromLogContext()
+            .Enrich.WithSensitiveDataMasking(options => options.Mode = MaskingMode.Globally)
             .Enrich.WithProperty("AppVersion", Assembly.GetExecutingAssembly().GetName().Version)
             .Enrich.WithProperty("CLRVersion", Environment.Version)
             .Enrich.WithProperty("FrameworkDescription", RuntimeInformation.FrameworkDescription)

@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -14,13 +15,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 using Serilog;
-using Serilog.Events;
 
 var loggerConfiguration = new LoggerConfiguration()
         .Enrich.FromLogContext()
-        .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
-        .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
-        .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
+        .Enrich.WithProperty("AppVersion", Assembly.GetExecutingAssembly().GetName().Version)
+        .Enrich.WithProperty("CLRVersion", Environment.Version)
+        .Enrich.WithProperty("FrameworkDescription", RuntimeInformation.FrameworkDescription)
+        .Enrich.WithProperty("IsPrivilegedProcess", Environment.IsPrivilegedProcess)
+        .Enrich.WithProperty("OSDescription", RuntimeInformation.OSDescription)
+        .Enrich.WithProperty("Is64BitOperatingSystem", Environment.Is64BitOperatingSystem)
+        .Enrich.WithProperty("Is64BitProcess", Environment.Is64BitProcess)
         .WriteTo.Console();
 
 // Serilog issue: https://github.com/serilog/serilog-aspnetcore/issues/289
@@ -38,9 +42,13 @@ try
             .ReadFrom.Configuration(builder.Configuration)
             .ReadFrom.Services(services)
             .Enrich.FromLogContext()
-            .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
-            .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
-            .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
+            .Enrich.WithProperty("AppVersion", Assembly.GetExecutingAssembly().GetName().Version)
+            .Enrich.WithProperty("CLRVersion", Environment.Version)
+            .Enrich.WithProperty("FrameworkDescription", RuntimeInformation.FrameworkDescription)
+            .Enrich.WithProperty("IsPrivilegedProcess", Environment.IsPrivilegedProcess)
+            .Enrich.WithProperty("OSDescription", RuntimeInformation.OSDescription)
+            .Enrich.WithProperty("Is64BitOperatingSystem", Environment.Is64BitOperatingSystem)
+            .Enrich.WithProperty("Is64BitProcess", Environment.Is64BitProcess)
             .WriteTo.Console());
     builder.Services.AddControllers()
             .AddJsonOptions(cfg =>

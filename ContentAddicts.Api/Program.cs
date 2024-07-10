@@ -16,6 +16,9 @@ using Microsoft.OpenApi.Models;
 
 using Serilog;
 using Serilog.Enrichers.Sensitive;
+using Serilog.Exceptions;
+using Serilog.Exceptions.Core;
+using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 
 var loggerConfiguration = new LoggerConfiguration()
         .Enrich.FromLogContext()
@@ -45,6 +48,9 @@ try
             .ReadFrom.Services(services)
             .Enrich.FromLogContext()
             .Enrich.WithSensitiveDataMasking(options => options.Mode = MaskingMode.Globally)
+            .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
+                    .WithDefaultDestructurers()
+                    .WithDestructurers([new DbUpdateExceptionDestructurer()]))
             .Enrich.WithProperty("AppVersion", Assembly.GetExecutingAssembly().GetName().Version)
             .Enrich.WithProperty("CLRVersion", Environment.Version)
             .Enrich.WithProperty("FrameworkDescription", RuntimeInformation.FrameworkDescription)

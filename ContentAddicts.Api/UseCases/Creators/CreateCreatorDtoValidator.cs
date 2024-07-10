@@ -11,6 +11,8 @@ public class CreateCreatorDtoValidator : AbstractValidator<CreateCreatorDto>
         RuleFor(c => c.Name)
                 .NotEmpty()
                 .Length(1, 32);
+        RuleFor(c => c.OtherNames)
+                .Must(o => o.Count <= 25);
         RuleForEach(c => c.OtherNames)
                 .NotEmpty()
                 .Length(1, 32)
